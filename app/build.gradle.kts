@@ -13,11 +13,11 @@ val generatedVersionCode =
     (buildNow.year % 100) * 1_000_000 + buildNow.monthValue * 10_000 + buildNow.dayOfMonth * 100 + buildNow.hour
 
 android {
-    namespace = "com.example.audio_stream_app"
+    namespace = "cn.qsbye.robot_suit_zulu"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.audio_stream_app"
+        applicationId = "cn.qsbye.robot_suit_zulu"
         minSdk = 24
         targetSdk = 34
         versionCode = generatedVersionCode

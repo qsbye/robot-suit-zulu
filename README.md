@@ -1,4 +1,9 @@
-# RobotSuitZulu — 手机机器人实验工具箱
+<p align="center">
+  <img src="assets/monocular_depth_map.jpg" width="128" alt="RobotSuitZulu Logo">
+</p>
+
+# RobotSuitZulu — 玑函
+* 手机机器人实验工具箱
 
 把手机变成一台“会看、会算、会思考”的机器人实验平台：摄像头、IMU、算力、屏幕、网络全部端上闭环，不需要外接工控机，也不依赖云端推理。
 

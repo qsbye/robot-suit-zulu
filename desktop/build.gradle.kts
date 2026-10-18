@@ -7,7 +7,7 @@ plugins {
     id("com.gradleup.shadow") version "8.3.5"
 }
 
-group = "com.example.audio_stream_app"
+group = "cn.qsbye.robot_suit_zulu"
 version = "1.0.0"
 
 dependencies {
@@ -29,7 +29,7 @@ tasks.withType<KotlinCompile>().configureEach {
 
 compose.desktop {
     application {
-        mainClass = "com.example.audio_stream_app.desktop.MainKt"
+        mainClass = "cn.qsbye.robot_suit_zulu.desktop.MainKt"
     }
 }
 
@@ -43,7 +43,7 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     exclude("META-INF/*.RSA")
     manifest {
         attributes(
-            "Main-Class" to "com.example.audio_stream_app.desktop.MainKt",
+            "Main-Class" to "cn.qsbye.robot_suit_zulu.desktop.MainKt",
             "Implementation-Title" to "RobotSuitZulu",
             "Implementation-Version" to project.version
         )
