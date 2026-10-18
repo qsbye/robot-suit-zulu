@@ -239,7 +239,7 @@ fun AboutPage(
         if (icon != null) {
             Image(
                 bitmap = icon,
-                contentDescription = "AudioSuitZulu",
+                contentDescription = "RobotSuitZulu",
                 modifier = Modifier.size(96.dp)
             )
         }
@@ -247,7 +247,7 @@ fun AboutPage(
         Spacer(Modifier.height(16.dp))
 
         Text(
-            text = "AudioSuitZulu音函",
+            text = "RobotSuitZulu音函",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold
         )

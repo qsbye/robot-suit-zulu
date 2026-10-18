@@ -29,7 +29,7 @@ private val EarthColorScheme = lightColorScheme(
 )
 
 @Composable
-fun AudioSuitZuluTheme(
+fun RobotSuitZuluTheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(

@@ -19,7 +19,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "audio-suppression-zulu"
+rootProject.name = "RobotSuitZulu"
 include(":app")
 include(":desktop")
  

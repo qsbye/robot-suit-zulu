@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # build-with-timestamp.sh
-# 构建 AudioSuitZulu 的 Release APK，并复制到项目根目录（文件名带时间戳后缀）。
+# 构建 RobotSuitZulu 的 Release APK，并复制到项目根目录（文件名带时间戳后缀）。
 #
 # 用法:
 #   ./build-with-timestamp.sh
@@ -15,7 +15,7 @@
 set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-APP_NAME="AudioSuitZulu"
+APP_NAME="RobotSuitZulu"
 GRADLEW="$PROJECT_DIR/gradlew"
 APK_SRC="$PROJECT_DIR/app/build/outputs/apk/release/app-release-unsigned.apk"
 

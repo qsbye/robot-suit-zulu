@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import com.example.audio_stream_app.desktop.ui.theme.AudioSuitZuluTheme
+import com.example.audio_stream_app.desktop.ui.theme.RobotSuitZuluTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,7 +36,7 @@ fun main() = application {
             exitApplication()
         },
         state = windowState,
-        title = "AudioSuitZulu音函 (macOS)"
+        title = "RobotSuitZulu音函 (macOS)"
     ) {
         App()
     }
@@ -74,7 +74,7 @@ private fun App() {
         selectedTab = index
     }
 
-    AudioSuitZuluTheme {
+    RobotSuitZuluTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background

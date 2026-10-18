@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import com.example.audio_stream_app.dsp.HowlingSuppressor
 import com.example.audio_stream_app.dsp.NlmsAec
-import com.example.audio_stream_app.ui.theme.AudioSuitZuluTheme
+import com.example.audio_stream_app.ui.theme.RobotSuitZuluTheme
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.math.pow
@@ -82,7 +82,7 @@ class MainActivity : ComponentActivity() {
         silencerEngine = SilencerEngine(applicationContext)
 
         setContent {
-            AudioSuitZuluTheme {
+            RobotSuitZuluTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

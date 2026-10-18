@@ -34,7 +34,7 @@ compose.desktop {
 }
 
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
-    archiveBaseName.set("AudioSuitZulu-desktop")
+    archiveBaseName.set("RobotSuitZulu-desktop")
     archiveClassifier.set("all")
     mergeServiceFiles()
     // 去除已簽名依賴的簽名檔，避免 fat jar 內簽名校驗失敗
@@ -44,7 +44,7 @@ tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     manifest {
         attributes(
             "Main-Class" to "com.example.audio_stream_app.desktop.MainKt",
-            "Implementation-Title" to "AudioSuitZulu",
+            "Implementation-Title" to "RobotSuitZulu",
             "Implementation-Version" to project.version
         )
     }
