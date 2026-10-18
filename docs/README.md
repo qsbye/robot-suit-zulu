@@ -1,6 +1,6 @@
 # 参考资料
 
-本目录收录回声消除（AEC）、主动噪声消除（ANC）、降噪（ANS/NS）相关的学习资料，均由本地保存的网页 HTML 经 [markitdown](https://github.com/microsoft/markitdown)（uv tool 安装）转换为 Markdown 并人工整理排版（自 2026-10-02 起陆续归档），文首标注原文来源。图片在原网页中为内联资源的，转换后以占位形式呈现；原图为远程链接的保留原链接，需要时请访问原文链接查看。
+本目录收录回声消除（AEC）、主动噪声消除（ANC）、降噪（ANS/NS）等音频算法学习资料，以及单目深度估计、神经网络可解释性等 AI 前沿文章，均由本地保存的网页 HTML 经 [markitdown](https://github.com/microsoft/markitdown)（uv tool 安装）转换为 Markdown 并人工整理排版（自 2026-10-02 起陆续归档），文首标注原文来源。图片在原网页中为内联资源的，转换后以占位形式呈现；原图为远程链接的保留原链接，需要时请访问原文链接查看。
 
 ## 目录
 
@@ -11,6 +11,8 @@
 | [通讯软件的“回声消除”是如何运作的？](aec-in-communication-apps-reddit.md) | Teams/Discord/Zoom 的 AEC 工程实践、与主动降噪（ANC）的区别、可用的 VST 方案（Reddit 问答整理） | [r/audioengineering](https://www.reddit.com/r/audioengineering/comments/vdxgvr/how_do_communication_apps_echo_cancellation/) |
 | [RNNoise: Learning Noise Suppression](rnnoise-learning-noise-suppression.md) | 经典信号处理 + 深度学习（GRU）结合的实时降噪原理与演示 | [Jean-Marc Valin / Xiph.Org](https://jmvalin.ca/demo/rnnoise/) |
 | [主动噪声消除（ANC）算法研究（译文）](anc-algorithm-research-cnblogs.md) | 窄带/宽带前馈与反馈 ANC 系统、Wiener 滤波器、LMS/FxLMS/FxRLS 算法与 Python 仿真，含英文原文附录 | [博客园 · qsBye 译文](https://www.cnblogs.com/qsbye/p/18385474) |
+| [把 Depth Anything 砍到 6M，深度估计终于能跑进 Jetson](depthart-tiny-depth-estimation-jetson-aitnt.md) | 6M 参数级基础深度模型 DepthART：抗偏置数据采样（BRDS）、相机条件化微调（CamFT）、MobileNetV4/SPF 轻量变体与端侧部署 | [AITNT · 机器之心](https://m.aitntnews.com/newDetail.html?newId=29947) |
+| [神经网络可解释性被 AI 解决了？90% 神经元只有一个功能](neural-network-interpretability-weixin.md) | Nick Cammarata 长文解读：多义性再审视、递归泛化、AI 科学家驱动的可解释性研究 | [微信公众号「机器之心」](https://mp.weixin.qq.com/s/_oqtFLpXkFSufQGz-adGHQ) |
 
 ## 与本项目的关系
 
