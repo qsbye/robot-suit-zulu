@@ -2,18 +2,22 @@ package cn.qsbye.robot_suit_zulu
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorManager
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.AudioTrack
 import android.media.MediaRecorder
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -62,6 +66,16 @@ class MainActivity : ComponentActivity() {
 
     private val handler = Handler(Looper.getMainLooper())
 
+    // ---- 实验二（IMU 小球 + BLE 遥控） ----
+    private lateinit var sensorManager: SensorManager
+    private var gyro: Sensor? = null
+    private var accel: Sensor? = null
+    private val imuVm: ImuViewModel by viewModels()
+    private val ble by lazy { BleController(applicationContext) }
+
+    private val blePermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { }
+
     private val volumePoller = object : Runnable {
         override fun run() {
             updateVolumeDisplay()
@@ -80,6 +94,11 @@ class MainActivity : ComponentActivity() {
         audioManager = getSystemService(AudioManager::class.java)
         executorService = Executors.newSingleThreadExecutor()
         silencerEngine = SilencerEngine(applicationContext)
+
+        sensorManager = getSystemService(SensorManager::class.java)
+        gyro = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
+        accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        requestBlePermissions()
 
         setContent {
             RobotSuitZuluTheme {
@@ -102,6 +121,11 @@ class MainActivity : ComponentActivity() {
                             Tab(
                                 selected = selectedTab == 2,
                                 onClick = { selectTab(2) },
+                                text = { Text("遥控实验") }
+                            )
+                            Tab(
+                                selected = selectedTab == 3,
+                                onClick = { selectTab(3) },
                                 text = { Text("关于") }
                             )
                         }
@@ -128,7 +152,13 @@ class MainActivity : ComponentActivity() {
                                 onRecordStop = { stopStreaming() }
                             )
                             1 -> SilencerPage(engine = silencerEngine)
-                            2 -> AboutPage(versionName = BuildConfig.VERSION_NAME)
+                            2 -> ImuBlePage(
+                                vm = imuVm,
+                                ble = ble,
+                                hasGyro = gyro != null,
+                                hasAccel = accel != null
+                            )
+                            3 -> AboutPage(versionName = BuildConfig.VERSION_NAME)
                         }
                     }
                 }
@@ -148,6 +178,15 @@ class MainActivity : ComponentActivity() {
         if (selectedTab == 0) stopStreaming()
         if (selectedTab == 1) silencerEngine.stopAll()
         selectedTab = index
+    }
+
+    private fun requestBlePermissions() {
+        val perms = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
+        } else {
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+        blePermissionLauncher.launch(perms)
     }
 
     private fun checkPermissions() {
@@ -286,11 +325,15 @@ class MainActivity : ComponentActivity() {
         handler.removeCallbacks(volumePoller)
         updateVolumeDisplay()
         handler.post(volumePoller)
+        // GAME 档约 50Hz，兼顾响应速度与功耗
+        gyro?.let { sensorManager.registerListener(imuVm, it, SensorManager.SENSOR_DELAY_GAME) }
+        accel?.let { sensorManager.registerListener(imuVm, it, SensorManager.SENSOR_DELAY_GAME) }
     }
 
     override fun onPause() {
         super.onPause()
         handler.removeCallbacks(volumePoller)
+        sensorManager.unregisterListener(imuVm)
         // 退后台自动停止两页音频会话并释放设备（FR-7 / NFR-4）
         stopStreaming()
         if (::silencerEngine.isInitialized) silencerEngine.stopAll()
