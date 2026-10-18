@@ -1,11 +1,14 @@
 package com.qsbye.switchpageimu
 
+import android.Manifest
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -40,15 +43,30 @@ class MainActivity : ComponentActivity() {
     // 用 by viewModels() 在 onCreate 之前即建好 ViewModel，
     // 避免原实现里 onResume 时 Compose 尚未执行、vm 为 null 导致监听从未注册
     private val vm: ImuViewModel by viewModels()
+    private val ble by lazy { BleController(applicationContext) }
+
+    // BLE 运行时权限：Android 12+ 用 BLUETOOTH_SCAN/CONNECT，更早版本用定位权限
+    private val permissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         gyro = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
         accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        requestBlePermissions()
         setContent {
-            MaterialTheme { AppRoot(vm, gyro != null, accel != null) }
+            MaterialTheme { AppRoot(vm, ble, gyro != null, accel != null) }
         }
+    }
+
+    private fun requestBlePermissions() {
+        val perms = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
+        } else {
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+        permissionLauncher.launch(perms)
     }
 
     override fun onResume() {
@@ -65,7 +83,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppRoot(vm: ImuViewModel, hasGyro: Boolean, hasAccel: Boolean) {
+fun AppRoot(vm: ImuViewModel, ble: BleController, hasGyro: Boolean, hasAccel: Boolean) {
     val s by vm.ui
     Column(
         modifier = Modifier
@@ -76,15 +94,15 @@ fun AppRoot(vm: ImuViewModel, hasGyro: Boolean, hasAccel: Boolean) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = if (s.page == 0) "陀螺仪小球（第 1 页）" else "说明页（第 2 页）",
+            text = "${ImuViewModel.PAGE_NAMES[s.page]}（第 ${s.page + 1} 页，共 ${ImuViewModel.PAGE_COUNT} 页）",
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.clickable { vm.togglePage() }
         )
         SensorCard(s, hasGyro, hasAccel)
-        if (s.page == 0) {
-            BallPage(vm)
-        } else {
-            InfoPage()
+        when (s.page) {
+            0 -> BallPage(vm)
+            1 -> InfoPage()
+            else -> BleControlPage(ble)
         }
         Text(s.lastShakeText, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF6B5B3E))
     }
@@ -146,8 +164,8 @@ fun InfoPage() {
             Text("原理说明", style = MaterialTheme.typography.titleMedium)
             Text("1. 陀螺仪 TYPE_GYROSCOPE 输出三轴角速度(rad/s)，对时间积分得到手机倾角，倾角映射为小球速度：绕 y 轴转动（左右横滚）驱动水平移动，绕 x 轴转动（前后俯仰）驱动垂直移动。")
             Text("2. 积分角带轻微回零衰减并钳制在 ±0.9rad，抑制 MEMS 零偏导致的自漂移。")
-            Text("3. 加速度计 TYPE_ACCELEROMETER 计算三轴模长，超出重力 9.8 的部分大于阈值 12m/s² 且距上次触发超过 800ms 时判定为摇一摇，两个页面来回切换。")
-            Text("4. 摇一摇切回本页之外的页面后，再摇一次即可返回小球页。")
+            Text("3. 加速度计 TYPE_ACCELEROMETER 计算三轴模长，超出重力 9.8 的部分大于阈值 12m/s² 且距上次触发超过 800ms 时判定为摇一摇，三个页面循环切换。")
+            Text("4. 遥控页通过 BLE 连接 esp32（Nordic UART 服务），拖动手柄发送 forward/backward/left/right 指令，1 秒消抖。")
         }
     }
 }

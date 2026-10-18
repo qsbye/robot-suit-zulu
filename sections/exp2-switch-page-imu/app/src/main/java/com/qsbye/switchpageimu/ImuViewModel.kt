@@ -19,7 +19,7 @@ data class ImuUiState(
     val eventCount: Long = 0L,      // 已收到的传感器事件总数，用于确认数据通道畅通
     val ballX: Float = 0f,          // 像素坐标
     val ballY: Float = 0f,
-    val page: Int = 0,              // 0 = 小球页, 1 = 说明页
+    val page: Int = 0,              // 0 = 小球页, 1 = 说明页, 2 = BLE遥控页
     val lastShakeText: String = "尚未检测到摇一摇"
 )
 
@@ -47,6 +47,8 @@ class ImuViewModel : ViewModel(), SensorEventListener {
         const val DRIFT_DECAY = 0.15f     // 每秒回零衰减比例，抑制陀螺仪零偏漂移
         const val SHAKE_THRESHOLD = 12f   // 超出重力部分的瞬时加速度阈值 m/s^2
         const val SHAKE_COOLDOWN_MS = 800L
+        const val PAGE_COUNT = 3
+        val PAGE_NAMES = listOf("小球页", "说明页", "遥控页")
     }
 
     /** 画布尺寸就绪后记录边界并首次居中 */
@@ -72,10 +74,10 @@ class ImuViewModel : ViewModel(), SensorEventListener {
     /** 手动切页（与摇一摇等效，便于演示与截图） */
     fun togglePage() {
         val s = _ui.value
-        val newPage = 1 - s.page
+        val newPage = (s.page + 1) % PAGE_COUNT
         _ui.value = s.copy(
             page = newPage,
-            lastShakeText = "手动切页 -> 切换到${if (newPage == 0) "小球页" else "说明页"}"
+            lastShakeText = "手动切页 -> 切换到${PAGE_NAMES[newPage]}"
         )
     }
 
@@ -122,10 +124,10 @@ class ImuViewModel : ViewModel(), SensorEventListener {
         val excess = mag - SensorManager.GRAVITY_EARTH
         if (excess > SHAKE_THRESHOLD && now - lastShakeMs > SHAKE_COOLDOWN_MS) {
             lastShakeMs = now
-            val newPage = 1 - s.page
+            val newPage = (s.page + 1) % PAGE_COUNT
             s = s.copy(
                 page = newPage,
-                lastShakeText = "摇一摇触发 -> 切换到${if (newPage == 0) "小球页" else "说明页"}"
+                lastShakeText = "摇一摇触发 -> 切换到${PAGE_NAMES[newPage]}"
             )
         }
         _ui.value = s

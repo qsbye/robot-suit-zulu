@@ -81,6 +81,30 @@
 
 **用到的 slambook2.rs 知识点**：相机模型与内参标定（ch5）、对极几何与位姿估计（ch7）、李群李代数与曲线拟合（ch4/ch6）。
 
+### 实验二：IMU 小球 + BLE 遥控 esp32（已实现）✅
+
+> 纯 Kotlin + Jetpack Compose，无第三方 BLE 库；工程位于 [`sections/exp2-switch-page-imu/`](sections/exp2-switch-page-imu/)
+
+**目标**：一个 App 演示三件事——陀螺仪姿态感知、摇一摇交互、手机经 BLE 遥控 esp32 小车/小灯。
+
+**功能**：
+
+1. **陀螺仪小球页**：`TYPE_GYROSCOPE` 角速度对时间积分得手机倾角（带回零衰减抑制 MEMS 零偏），倾角映射为小球速度，转动手机让小球在边界框内滚动
+2. **摇一摇切页**：`TYPE_ACCELEROMETER` 三轴模长超出重力阈值（12 m/s²，冷却 800ms）判定为摇一摇，在小球页 → 说明页 → 遥控页间循环切换
+3. **BLE 遥控页**（复刻传统 XML 布局的 Compose 版本）：
+   - 纯 Android BLE API（`BluetoothLeScanner` + `BluetoothGatt` + CCCD 通知），替代 RxBLE/RxJava 封装
+   - 扫描连接 esp32 的 Nordic UART 服务（`6E400001-...`，RX 写指令 / TX 收通知）
+   - Compose Canvas 虚拟手柄：拖拽判定主方向（forward/backward/left/right），1 秒消抖后写入指令帧；连接成功自动翻转 esp32 小灯
+   - 顶部导航栏 / 中部状态区（电量、速度、旋转角度）/ 底部日志区（25 行时间戳日志，自动滚底），马卡龙配色
+
+**演示**：
+
+| 小球页 | 说明页 | 摇一摇切页动图 |
+| --- | --- | --- |
+| ![ball](sections/exp2-switch-page-imu/screenshots/imu-ball-page.png) | ![info](sections/exp2-switch-page-imu/screenshots/imu-info-page.png) | ![demo](sections/exp2-switch-page-imu/screenshots/imu-demo.gif) |
+
+**esp32 端固件**：[esp32笔记[6]-蓝牙(BLE)控制小灯](https://www.cnblogs.com/qsbye/p/17566976.html)
+
 ## 目录结构
 
 ```
