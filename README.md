@@ -178,4 +178,8 @@ cd bridge && cargo run -- --port /dev/ttyUSB0
 
 ## 许可证
 
-MIT License. 欢迎 Issue 与 PR 交流实验复现问题。
+本仓库主体代码以 [MIT License](LICENSE) 授权，Copyright (c) 2026 qsbye。
+
+仓库中收录的第三方内容（参考工程、应用存档、文章存档等）**不属于** MIT 覆盖范围，版权归原作者，明细见 [NOTICE.md](NOTICE.md)。
+
+欢迎 Issue 与 PR 交流实验复现问题。
