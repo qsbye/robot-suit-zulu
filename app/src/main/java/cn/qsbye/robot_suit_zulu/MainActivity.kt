@@ -1,6 +1,7 @@
 package cn.qsbye.robot_suit_zulu
 
 import android.Manifest
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorManager
@@ -45,7 +46,7 @@ import kotlin.math.pow
 class MainActivity : ComponentActivity() {
     private var isRecording by mutableStateOf(false)
     private var gainDb by mutableDoubleStateOf(0.0)
-    // 标签索引：0=扩音器（隐藏） 1=消音器（隐藏） 2=遥控实验 3=绘画 4=关于
+    // 标签索引：0=扩音器（隐藏） 1=消音器（隐藏） 2=转小球 3=绘画 4=关于 5=设置
     private var selectedTab by mutableIntStateOf(2)
     private var volume by mutableIntStateOf(0)
     private var maxVolume by mutableIntStateOf(1)
@@ -81,6 +82,10 @@ class MainActivity : ComponentActivity() {
     private val drawVm: DrawViewModel by viewModels()
     private val drawTracker by lazy { OrientationTracker(sensorManager) }
 
+    // ---- 设置页 ----
+    private var forcePortrait by mutableStateOf(true)
+    private val prefs by lazy { getSharedPreferences("settings", MODE_PRIVATE) }
+
     private val blePermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { }
 
@@ -108,6 +113,10 @@ class MainActivity : ComponentActivity() {
         accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         requestBlePermissions()
 
+        // 恢复设置并应用屏幕方向
+        forcePortrait = prefs.getBoolean("force_portrait", true)
+        applyOrientation()
+
         setContent {
             RobotSuitZuluTheme {
                 Surface(
@@ -130,7 +139,7 @@ class MainActivity : ComponentActivity() {
                             Tab(
                                 selected = selectedTab == 2,
                                 onClick = { selectTab(2) },
-                                text = { Text("遥控实验") }
+                                text = { Text("转小球") }
                             )
                             Tab(
                                 selected = selectedTab == 3,
@@ -141,6 +150,11 @@ class MainActivity : ComponentActivity() {
                                 selected = selectedTab == 4,
                                 onClick = { selectTab(4) },
                                 text = { Text("关于") }
+                            )
+                            Tab(
+                                selected = selectedTab == 5,
+                                onClick = { selectTab(5) },
+                                text = { Text("设置") }
                             )
                         }
 
@@ -174,6 +188,10 @@ class MainActivity : ComponentActivity() {
                             )
                             3 -> DrawPage(vm = drawVm, tracker = drawTracker)
                             4 -> AboutPage(versionName = BuildConfig.VERSION_NAME)
+                            5 -> SettingsPage(
+                                forcePortrait = forcePortrait,
+                                onForcePortraitChange = { updateForcePortrait(it) }
+                            )
                         }
                     }
                 }
@@ -193,6 +211,21 @@ class MainActivity : ComponentActivity() {
         if (selectedTab == 0) stopStreaming()
         if (selectedTab == 1) silencerEngine.stopAll()
         selectedTab = index
+    }
+
+    /** 按设置锁定/放开屏幕方向 */
+    private fun applyOrientation() {
+        requestedOrientation = if (forcePortrait) {
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        }
+    }
+
+    private fun updateForcePortrait(value: Boolean) {
+        forcePortrait = value
+        prefs.edit().putBoolean("force_portrait", value).apply()
+        applyOrientation()
     }
 
     private fun requestBlePermissions() {
