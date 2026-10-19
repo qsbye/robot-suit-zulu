@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
@@ -32,21 +33,26 @@ import androidx.core.content.ContextCompat
 import java.util.concurrent.Executors
 
 /**
- * 二维码引导定位主界面：
- * 相机预览 + 绿色锁定框 + 蓝色路径曲线 + 位姿信息。
- * 检出在位姿线程完成，结果经平滑后写入 Compose 状态驱动重绘。
+ * 单个二维码的显示项：检出 + 平滑后位姿（路径仅用于最近的一个）。
+ */
+private class TrackedCode(
+    val detection: QrDetection,
+    val t: FloatArray,
+)
+
+/**
+ * 二维码引导定位主界面（支持同帧多码）：
+ * 相机预览 + 每个码的绿色锁定框与内容标签 + 指向最近码的蓝色路径 + 位姿信息。
+ * 检出在分析线程完成，按内容做 EMA 平滑后写入 Compose 状态驱动重绘。
  */
 @Composable
 fun QrPoseScreen(hasCamera: Boolean) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    var quad by remember { mutableStateOf<QrQuad?>(null) }
+    var codes by remember { mutableStateOf<List<TrackedCode>>(emptyList()) }
     var path by remember { mutableStateOf<FloatArray?>(null) }
     var status by remember { mutableStateOf("对准二维码…") }
-
-    // 位姿平滑（EMA），抑制逐帧抖动
-    val smoothT = remember { arrayOfNulls<Float>(3) }
 
     Box(
         Modifier
@@ -62,28 +68,37 @@ fun QrPoseScreen(hasCamera: Boolean) {
                     }
                     val analysisExecutor = Executors.newSingleThreadExecutor()
                     val mainExecutor = ContextCompat.getMainExecutor(ctx)
-                    val analyzer = QrAnalyzer { q ->
-                        var pathPts: FloatArray? = null
-                        var text = "未检出二维码"
-                        if (q != null) {
-                            val pose = Pose.estimate(q.points, q.frameWidth, q.frameHeight)
-                            if (pose != null) {
-                                // EMA 平滑平移向量
-                                for (i in 0..2) {
-                                    val prev = smoothT[i]
-                                    smoothT[i] = if (prev == null) pose.t[i]
-                                    else prev * 0.7f + pose.t[i] * 0.3f
-                                }
-                                val t = FloatArray(3) { smoothT[it]!! }
-                                pathPts = Pose.bezierPath(t)
-                                text = "二维码中心  dx=%.2f  dy=%.2f  dz=%.2f m".format(t[0], t[1], t[2])
+                    // 按内容（文本）维系的 EMA 平滑位姿缓存
+                    val smoothT = HashMap<String, FloatArray>()
+                    val analyzer = QrAnalyzer { detections ->
+                        val tracked = detections.mapNotNull { d ->
+                            val pose = Pose.estimate(d.points, d.frameWidth, d.frameHeight)
+                                ?: return@mapNotNull null
+                            val prev = smoothT[d.text]
+                            val t = if (prev == null) {
+                                pose.t.copyOf()
+                            } else {
+                                FloatArray(3) { prev[it] * 0.7f + pose.t[it] * 0.3f }
                             }
-                        } else {
-                            smoothT.fill(null)
+                            smoothT[d.text] = t
+                            TrackedCode(d, t)
                         }
-                        val qq = q
+                        // 路径指向最近（dz 最小）的码
+                        val nearest = tracked.minByOrNull { it.t[2] }
+                        val pathPts = nearest?.let { Pose.bezierPath(it.t) }
+                        val text = if (tracked.isEmpty()) "未检出二维码"
+                        else buildString {
+                            append("检出 ").append(tracked.size).append(" 个二维码")
+                            nearest?.let {
+                                append("  最近：")
+                                append(it.detection.text.take(24))
+                                append("  dz=")
+                                append("%.2f".format(it.t[2]))
+                                append("m")
+                            }
+                        }
                         mainExecutor.execute {
-                            quad = qq
+                            codes = tracked
                             path = pathPts
                             status = text
                         }
@@ -114,33 +129,48 @@ fun QrPoseScreen(hasCamera: Boolean) {
                 },
             )
 
-            // 叠加层：锁定框 + 路径 + 目标点
+            // 叠加层：锁定框 + 内容标签 + 路径 + 目标点
             Canvas(Modifier.fillMaxSize()) {
-                val q = quad ?: return@Canvas
+                val list = codes
+                if (list.isEmpty()) return@Canvas
+                val first = list.first().detection
                 // 分析帧 -> 预览视图坐标（FILL_CENTER：等比放大铺满，居中裁剪）
                 val scale = maxOf(
-                    size.width / q.frameWidth,
-                    size.height / q.frameHeight,
+                    size.width / first.frameWidth,
+                    size.height / first.frameHeight,
                 )
-                val offX = (size.width - q.frameWidth * scale) / 2f
-                val offY = (size.height - q.frameHeight * scale) / 2f
+                val offX = (size.width - first.frameWidth * scale) / 2f
+                val offY = (size.height - first.frameHeight * scale) / 2f
                 fun mapX(x: Float) = x * scale + offX
                 fun mapY(y: Float) = y * scale + offY
 
-                // 绿色锁定框（四角连线）
                 val green = Color(0xFF66BB6A)
-                val p = q.points
-                for (i in 0 until 4) {
-                    val j = (i + 1) % 4
-                    drawLine(
-                        green,
-                        Offset(mapX(p[2 * i]), mapY(p[2 * i + 1])),
-                        Offset(mapX(p[2 * j]), mapY(p[2 * j + 1])),
-                        strokeWidth = 4f,
-                    )
+                // 每个码的绿色锁定框 + 内容标签
+                for (code in list) {
+                    val p = code.detection.points
+                    for (i in 0 until 4) {
+                        val j = (i + 1) % 4
+                        drawLine(
+                            green,
+                            Offset(mapX(p[2 * i]), mapY(p[2 * i + 1])),
+                            Offset(mapX(p[2 * j]), mapY(p[2 * j + 1])),
+                            strokeWidth = 4f,
+                        )
+                    }
+                    if (code.detection.text.isNotEmpty()) {
+                        drawContext.canvas.nativeCanvas.drawText(
+                            code.detection.text.take(24),
+                            mapX(p[0]),
+                            mapY(p[1]) - 12f,
+                            android.graphics.Paint().apply {
+                                color = android.graphics.Color.rgb(102, 187, 106)
+                                textSize = 34f
+                            },
+                        )
+                    }
                 }
 
-                // 蓝色路径曲线
+                // 蓝色路径曲线（指向最近的码）
                 val pathPts = path
                 if (pathPts != null) {
                     val blue = Color(0xFF42A5F5)
@@ -148,20 +178,20 @@ fun QrPoseScreen(hasCamera: Boolean) {
                     for (i in 0 until pathPts.size / 3) {
                         val pt = Pose.project(
                             floatArrayOf(pathPts[3 * i], pathPts[3 * i + 1], pathPts[3 * i + 2]),
-                            q.frameWidth, q.frameHeight,
+                            first.frameWidth, first.frameHeight,
                         ) ?: continue
                         val cur = Offset(mapX(pt[0]), mapY(pt[1]))
                         prev?.let { drawLine(blue, it, cur, strokeWidth = 6f) }
                         prev = cur
                     }
-                    // 目标点（路径末端即二维码中心，画红点）
+                    // 目标点（路径末端即最近码中心，画红点）
                     val n = pathPts.size / 3
                     if (n > 0) {
                         Pose.project(
                             floatArrayOf(
                                 pathPts[3 * (n - 1)], pathPts[3 * (n - 1) + 1], pathPts[3 * (n - 1) + 2],
                             ),
-                            q.frameWidth, q.frameHeight,
+                            first.frameWidth, first.frameHeight,
                         )?.let {
                             drawCircle(
                                 Color(0xFFEF5350),

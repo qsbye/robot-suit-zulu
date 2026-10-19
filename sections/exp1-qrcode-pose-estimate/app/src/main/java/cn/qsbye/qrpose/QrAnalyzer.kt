@@ -7,38 +7,46 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.BinaryBitmap
 import com.google.zxing.DecodeHintType
 import com.google.zxing.PlanarYUVLuminanceSource
+import com.google.zxing.Result
 import com.google.zxing.common.GlobalHistogramBinarizer
 import com.google.zxing.common.HybridBinarizer
+import com.google.zxing.multi.GenericMultipleBarcodeReader
 import com.google.zxing.qrcode.QRCodeReader
 import java.util.EnumMap
 
 /**
- * 检出二维码的四角点坐标（"摆正后"帧画面，像素）。
+ * 单个二维码检出：内容 + 四角点（"摆正后"帧画面，像素）。
  * 四点顺时针（左上/右上/右下/左下），跟随二维码的旋转；
  * ZXing 仅返回 3 个定位图案中心，第 4 角按仿射（平行四边形）模型推算，
  * frameWidth/frameHeight 供 FILL_CENTER 预览映射使用。
  */
-data class QrQuad(
+data class QrDetection(
+    val text: String,
     /** [x0,y0, x1,y1, x2,y2, x3,y3]，顺序：左上/右上/右下/左下 */
     val points: FloatArray,
     val frameWidth: Int,
     val frameHeight: Int,
-)
+) {
+    override fun equals(other: Any?) =
+        other is QrDetection && other.text == text && other.points.contentEquals(points)
+
+    override fun hashCode() = 31 * text.hashCode() + points.contentHashCode()
+}
 
 /**
- * CameraX 帧分析器：ZXing 解出二维码后回调检出四边形（null = 本帧未检出）。
- * 识别方法参照 WaveSend（wave-send-zulu-air-fountain-android）的 QrAnalyzer，
- * 这里简化为「Hybrid → Global 直方图」两级候选（打印/贴纸码场景足够，
- * 屏幕拍摄场景的 Sauvola 兜底可后续按原实现补齐）。
+ * CameraX 帧分析器：ZXing 多码解码后回调检出列表（空 = 本帧未检出）。
+ * 识别方法参照 WaveSend（wave-send-zulu-air-fountain-android）的 QrAnalyzer：
+ * 「Hybrid → Global 直方图」两级候选二值化；多码支持用 ZXing 自带的
+ * GenericMultipleBarcodeReader（递归分割查找）。任意可解码尺寸的二维码均可检出。
  * STRATEGY_KEEP_ONLY_LATEST：检测慢于帧率时直接丢旧帧。
  *
  * 注：为满足 FOSS 依赖要求，使用 ZXing（Apache-2.0）而非 Google ML Kit（专有）。
  */
 class QrAnalyzer(
-    private val onQuad: (QrQuad?) -> Unit,
+    private val onDetections: (List<QrDetection>) -> Unit,
 ) : ImageAnalysis.Analyzer {
 
-    private val reader = QRCodeReader()
+    private val reader = GenericMultipleBarcodeReader(QRCodeReader())
     private val hints: Map<DecodeHintType, Any> =
         EnumMap<DecodeHintType, Any>(DecodeHintType::class.java).apply {
             put(DecodeHintType.POSSIBLE_FORMATS, listOf(BarcodeFormat.QR_CODE))
@@ -58,19 +66,20 @@ class QrAnalyzer(
 
             val data = extractLuma(imageProxy, srcW, srcH)
 
-            // ZXing 仅给出 3 个定位图案中心，旋转到摆正坐标系后推算第 4 角
-            val result = decode(data, srcW, srcH)
-            val srcPoints = result?.resultPoints ?: emptyArray()
-            val quad: QrQuad? = if (srcPoints.size >= 3) {
-                val rotated = srcPoints.take(3).map { rotatePoint(it.x, it.y, srcW, srcH, rotation) }
-                buildQuad(rotated, uprightW, uprightH)
-            } else null
-            onQuad(quad)
+            val results = decode(data, srcW, srcH)
+            val detections = results.mapNotNull { r ->
+                val srcPoints = r.resultPoints ?: return@mapNotNull null
+                if (srcPoints.size < 3) return@mapNotNull null
+                val rotated = srcPoints.take(3).map {
+                    rotatePoint(it.x, it.y, srcW, srcH, rotation)
+                }
+                buildQuad(rotated)?.let { QrDetection(r.text ?: "", it, uprightW, uprightH) }
+            }
+            onDetections(detections)
         } catch (_: Exception) {
-            onQuad(null)
+            onDetections(emptyList())
         } finally {
             imageProxy.close()
-            reader.reset()
         }
     }
 
@@ -104,16 +113,16 @@ class QrAnalyzer(
         }
     }
 
-    /** 两级候选解码：Hybrid 分块二值化 → Global 全局直方图 */
-    private fun decode(data: ByteArray, w: Int, h: Int): com.google.zxing.Result? {
+    /** 两级候选多码解码：Hybrid 分块二值化 → Global 全局直方图 */
+    private fun decode(data: ByteArray, w: Int, h: Int): Array<Result> {
         val src = PlanarYUVLuminanceSource(data, w, h, 0, 0, w, h, false)
         try {
-            return reader.decode(BinaryBitmap(HybridBinarizer(src)), hints)
+            return reader.decodeMultiple(BinaryBitmap(HybridBinarizer(src)), hints)
         } catch (_: Exception) { }
         try {
-            return reader.decode(BinaryBitmap(GlobalHistogramBinarizer(src)), hints)
+            return reader.decodeMultiple(BinaryBitmap(GlobalHistogramBinarizer(src)), hints)
         } catch (_: Exception) { }
-        return null
+        return emptyArray()
     }
 
     /** 将传感器原始坐标 (x,y) 旋转到摆正坐标系。 */
@@ -130,7 +139,7 @@ class QrAnalyzer(
      * 三个定位图案位于左上、右上、左下；先找出直角点（左上），
      * 再按 y 区分右上 / 左下，第 4 角（右下）按平行四边形模型推算。
      */
-    private fun buildQuad(points: List<Pair<Float, Float>>, fw: Int, fh: Int): QrQuad? {
+    private fun buildQuad(points: List<Pair<Float, Float>>): FloatArray? {
         val (a, b, c) = points
         // 两两距离平方，最远的一对为对角线（右上↔左下），第三点即左上
         val dab = dist2(a, b)
@@ -149,12 +158,9 @@ class QrAnalyzer(
         val bottomRight = (topRight.first + (bottomLeft.first - topLeft.first)) to
             (topRight.second + (bottomLeft.second - topLeft.second))
 
-        val pts = listOf(topLeft, topRight, bottomRight, bottomLeft)
-        return QrQuad(
-            points = pts.flatMap { listOf(it.first, it.second) }.toFloatArray(),
-            frameWidth = fw,
-            frameHeight = fh,
-        )
+        return listOf(topLeft, topRight, bottomRight, bottomLeft)
+            .flatMap { listOf(it.first, it.second) }
+            .toFloatArray()
     }
 
     private fun dist2(p: Pair<Float, Float>, q: Pair<Float, Float>): Float {

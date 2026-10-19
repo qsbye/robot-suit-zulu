@@ -38,6 +38,7 @@ import cn.qsbye.robot_suit_zulu.dsp.NlmsAec
 import cn.qsbye.robot_suit_zulu.draw.DrawPage
 import cn.qsbye.robot_suit_zulu.draw.DrawViewModel
 import cn.qsbye.robot_suit_zulu.draw.OrientationTracker
+import cn.qsbye.robot_suit_zulu.qrpose.QrPosePage
 import cn.qsbye.robot_suit_zulu.ui.theme.RobotSuitZuluTheme
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -46,7 +47,7 @@ import kotlin.math.pow
 class MainActivity : ComponentActivity() {
     private var isRecording by mutableStateOf(false)
     private var gainDb by mutableDoubleStateOf(0.0)
-    // 标签索引：0=扩音器（隐藏） 1=消音器（隐藏） 2=转小球 3=绘画 4=关于 5=设置
+    // 标签索引：0=扩音器（隐藏） 1=消音器（隐藏） 2=转小球 3=绘画 4=二维码定位 5=关于 6=设置
     private var selectedTab by mutableIntStateOf(2)
     private var volume by mutableIntStateOf(0)
     private var maxVolume by mutableIntStateOf(1)
@@ -149,11 +150,16 @@ class MainActivity : ComponentActivity() {
                             Tab(
                                 selected = selectedTab == 4,
                                 onClick = { selectTab(4) },
-                                text = { Text("关于") }
+                                text = { Text("二维码定位") }
                             )
                             Tab(
                                 selected = selectedTab == 5,
                                 onClick = { selectTab(5) },
+                                text = { Text("关于") }
+                            )
+                            Tab(
+                                selected = selectedTab == 6,
+                                onClick = { selectTab(6) },
                                 text = { Text("设置") }
                             )
                         }
@@ -187,8 +193,9 @@ class MainActivity : ComponentActivity() {
                                 hasAccel = accel != null
                             )
                             3 -> DrawPage(vm = drawVm, tracker = drawTracker)
-                            4 -> AboutPage(versionName = BuildConfig.VERSION_NAME)
-                            5 -> SettingsPage(
+                            4 -> QrPosePage()
+                            5 -> AboutPage(versionName = BuildConfig.VERSION_NAME)
+                            6 -> SettingsPage(
                                 forcePortrait = forcePortrait,
                                 onForcePortraitChange = { updateForcePortrait(it) }
                             )
