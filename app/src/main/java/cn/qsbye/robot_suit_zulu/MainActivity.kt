@@ -34,6 +34,9 @@ import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import cn.qsbye.robot_suit_zulu.dsp.HowlingSuppressor
 import cn.qsbye.robot_suit_zulu.dsp.NlmsAec
+import cn.qsbye.robot_suit_zulu.draw.DrawPage
+import cn.qsbye.robot_suit_zulu.draw.DrawViewModel
+import cn.qsbye.robot_suit_zulu.draw.OrientationTracker
 import cn.qsbye.robot_suit_zulu.ui.theme.RobotSuitZuluTheme
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -42,7 +45,8 @@ import kotlin.math.pow
 class MainActivity : ComponentActivity() {
     private var isRecording by mutableStateOf(false)
     private var gainDb by mutableDoubleStateOf(0.0)
-    private var selectedTab by mutableIntStateOf(0)
+    // 标签索引：0=扩音器（隐藏） 1=消音器（隐藏） 2=遥控实验 3=绘画 4=关于
+    private var selectedTab by mutableIntStateOf(2)
     private var volume by mutableIntStateOf(0)
     private var maxVolume by mutableIntStateOf(1)
     private var aecEnabled by mutableStateOf(true)
@@ -72,6 +76,10 @@ class MainActivity : ComponentActivity() {
     private var accel: Sensor? = null
     private val imuVm: ImuViewModel by viewModels()
     private val ble by lazy { BleController(applicationContext) }
+
+    // ---- 绘画页（FOSS 版 AR 画线） ----
+    private val drawVm: DrawViewModel by viewModels()
+    private val drawTracker by lazy { OrientationTracker(sensorManager) }
 
     private val blePermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { }
@@ -107,17 +115,18 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Column(Modifier.fillMaxSize()) {
-                        TabRow(selectedTabIndex = selectedTab) {
-                            Tab(
-                                selected = selectedTab == 0,
-                                onClick = { selectTab(0) },
-                                text = { Text("扩音器") }
-                            )
-                            Tab(
-                                selected = selectedTab == 1,
-                                onClick = { selectTab(1) },
-                                text = { Text("消音器") }
-                            )
+                        // 标签页可见性：扩音器/消音器已隐藏（代码保留，恢复时取消注释即可）
+                        TabRow(selectedTabIndex = (selectedTab - 2).coerceAtLeast(0)) {
+//                            Tab(
+//                                selected = selectedTab == 0,
+//                                onClick = { selectTab(0) },
+//                                text = { Text("扩音器") }
+//                            )
+//                            Tab(
+//                                selected = selectedTab == 1,
+//                                onClick = { selectTab(1) },
+//                                text = { Text("消音器") }
+//                            )
                             Tab(
                                 selected = selectedTab == 2,
                                 onClick = { selectTab(2) },
@@ -126,6 +135,11 @@ class MainActivity : ComponentActivity() {
                             Tab(
                                 selected = selectedTab == 3,
                                 onClick = { selectTab(3) },
+                                text = { Text("绘画") }
+                            )
+                            Tab(
+                                selected = selectedTab == 4,
+                                onClick = { selectTab(4) },
                                 text = { Text("关于") }
                             )
                         }
@@ -158,7 +172,8 @@ class MainActivity : ComponentActivity() {
                                 hasGyro = gyro != null,
                                 hasAccel = accel != null
                             )
-                            3 -> AboutPage(versionName = BuildConfig.VERSION_NAME)
+                            3 -> DrawPage(vm = drawVm, tracker = drawTracker)
+                            4 -> AboutPage(versionName = BuildConfig.VERSION_NAME)
                         }
                     }
                 }
@@ -328,12 +343,14 @@ class MainActivity : ComponentActivity() {
         // GAME 档约 50Hz，兼顾响应速度与功耗
         gyro?.let { sensorManager.registerListener(imuVm, it, SensorManager.SENSOR_DELAY_GAME) }
         accel?.let { sensorManager.registerListener(imuVm, it, SensorManager.SENSOR_DELAY_GAME) }
+        if (::sensorManager.isInitialized) drawTracker.start()
     }
 
     override fun onPause() {
         super.onPause()
         handler.removeCallbacks(volumePoller)
         sensorManager.unregisterListener(imuVm)
+        if (::sensorManager.isInitialized) drawTracker.stop()
         // 退后台自动停止两页音频会话并释放设备（FR-7 / NFR-4）
         stopStreaming()
         if (::silencerEngine.isInitialized) silencerEngine.stopAll()
