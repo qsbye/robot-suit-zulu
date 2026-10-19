@@ -35,4 +35,5 @@ GitHub 第三方 SLAM AR Android 工程的完整副本，原仓库**未附带许
 | AndroidX / Jetpack Compose / Material Components | Apache-2.0 |
 | Kotlin（JetBrains） | Apache-2.0 |
 | Compose Desktop（JetBrains） | Apache-2.0 |
+| CameraX（`sections/exp3-ar-draw-line/` 使用） | Apache-2.0 |
 | JUnit 4（仅测试） | EPL-1.0 |
