@@ -1,4 +1,4 @@
-package com.qsbye.switchpageimu
+package cn.qsbye.switchpageimu
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter

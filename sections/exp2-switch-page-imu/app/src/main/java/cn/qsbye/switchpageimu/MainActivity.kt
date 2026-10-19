@@ -1,4 +1,4 @@
-package com.qsbye.switchpageimu
+package cn.qsbye.switchpageimu
 
 import android.Manifest
 import android.content.Context

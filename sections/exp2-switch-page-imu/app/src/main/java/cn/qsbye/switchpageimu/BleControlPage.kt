@@ -1,4 +1,4 @@
-package com.qsbye.switchpageimu
+package cn.qsbye.switchpageimu
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background

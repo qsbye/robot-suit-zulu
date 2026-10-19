@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.qsbye.switchpageimu"
+    namespace = "cn.qsbye.switchpageimu"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.qsbye.switchpageimu"
+        applicationId = "cn.qsbye.switchpageimu"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
