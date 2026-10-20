@@ -17,13 +17,15 @@ class MnistDataset(val images: Array<ByteArray>, val labels: IntArray) {
 
         /**
          * 从 assets 读取 gzip 压缩的 IDX 文件（源自 TinyTorch 仓库 examples/mnist/data）。
+         * 注意：扩展名用 .gzip 而非 .gz —— aapt2 会将 .gz 资源解压打包并剥离后缀，
+         * 导致 assets.open("xxx.gz") 抛 FileNotFoundException。
          * IDX 格式：magic(4) + count(4) + rows(4) + cols(4) + 像素字节；标签：magic(4) + count(4) + 标签字节
          */
         fun load(assets: android.content.res.AssetManager, train: Boolean): MnistDataset {
             val prefix = if (train) "train" else "t10k"
             val limit = if (train) TRAIN_LIMIT else TEST_LIMIT
-            val imgBytes = readGzip(assets, "mnist/$prefix-images-idx3-ubyte.gz")
-            val lblBytes = readGzip(assets, "mnist/$prefix-labels-idx1-ubyte.gz")
+            val imgBytes = readGzip(assets, "mnist/$prefix-images-idx3-ubyte.gzip")
+            val lblBytes = readGzip(assets, "mnist/$prefix-labels-idx1-ubyte.gzip")
             val total = readInt(imgBytes, 4)
             val rows = readInt(imgBytes, 8); val cols = readInt(imgBytes, 12)
             val n = minOf(limit, total)
