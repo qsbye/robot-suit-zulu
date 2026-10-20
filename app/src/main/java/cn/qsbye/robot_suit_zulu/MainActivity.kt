@@ -19,19 +19,39 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import cn.qsbye.robot_suit_zulu.depth.DepthPage
 import cn.qsbye.robot_suit_zulu.dsp.HowlingSuppressor
@@ -40,6 +60,7 @@ import cn.qsbye.robot_suit_zulu.draw.DrawPage
 import cn.qsbye.robot_suit_zulu.draw.DrawViewModel
 import cn.qsbye.robot_suit_zulu.draw.OrientationTracker
 import cn.qsbye.robot_suit_zulu.qrpose.QrPosePage
+import cn.qsbye.robot_suit_zulu.quickjseditor.QuickJSPage
 import cn.qsbye.robot_suit_zulu.tinytorch.ui.TinyTorchPage
 import cn.qsbye.robot_suit_zulu.ui.theme.RobotSuitZuluTheme
 import java.util.concurrent.ExecutorService
@@ -51,8 +72,8 @@ class MainActivity : ComponentActivity() {
     private var gainDb by mutableDoubleStateOf(0.0)
     // 顶层标签索引：0=功能 1=关于 2=设置
     private var selectedTab by mutableIntStateOf(0)
-    // 功能页子标签索引：0=转小球 1=绘画 2=二维码定位 3=深度估计 4=深度学习（5=扩音器 6=消音器已隐藏）
-    private var functionTab by mutableIntStateOf(0)
+    // 功能页内当前选中的功能（null=功能列表，非null=功能详情）
+    private var functionPage by mutableStateOf<String?>(null)
     private var volume by mutableIntStateOf(0)
     private var maxVolume by mutableIntStateOf(1)
     private var aecEnabled by mutableStateOf(true)
@@ -149,79 +170,17 @@ class MainActivity : ComponentActivity() {
                         }
 
                         when (selectedTab) {
-                            0 -> Column {
-                                // 功能页子标签页：扩音器/消音器已隐藏（代码保留，恢复时取消注释即可）
-                                TabRow(selectedTabIndex = functionTab) {
-//                                    Tab(
-//                                        selected = functionTab == 5,
-//                                        onClick = { functionTab = 5 },
-//                                        text = { Text("扩音器") }
-//                                    )
-//                                    Tab(
-//                                        selected = functionTab == 6,
-//                                        onClick = { functionTab = 6 },
-//                                        text = { Text("消音器") }
-//                                    )
-                                    Tab(
-                                        selected = functionTab == 0,
-                                        onClick = { functionTab = 0 },
-                                        text = { Text("转小球") }
-                                    )
-                                    Tab(
-                                        selected = functionTab == 1,
-                                        onClick = { functionTab = 1 },
-                                        text = { Text("绘画") }
-                                    )
-                                    Tab(
-                                        selected = functionTab == 2,
-                                        onClick = { functionTab = 2 },
-                                        text = { Text("二维码定位") }
-                                    )
-                                    Tab(
-                                        selected = functionTab == 3,
-                                        onClick = { functionTab = 3 },
-                                        text = { Text("深度估计") }
-                                    )
-                                    Tab(
-                                        selected = functionTab == 4,
-                                        onClick = { functionTab = 4 },
-                                        text = { Text("深度学习") }
-                                    )
-                                }
-                                when (functionTab) {
-                                    0 -> ImuBlePage(
-                                        vm = imuVm,
-                                        ble = ble,
-                                        hasGyro = gyro != null,
-                                        hasAccel = accel != null
-                                    )
-                                    1 -> DrawPage(vm = drawVm, tracker = drawTracker)
-                                    2 -> QrPosePage()
-                                    3 -> DepthPage()
-                                    4 -> TinyTorchPage()
-//                                    5 -> LoudspeakerPage(
-//                                        isRecording = isRecording,
-//                                        volume = volume,
-//                                        maxVolume = maxVolume,
-//                                        gainDb = gainDb,
-//                                        aecEnabled = aecEnabled,
-//                                        howlingEnabled = howlingEnabled,
-//                                        waveformController = waveformController,
-//                                        onGainChange = { gainDb = it },
-//                                        onAecEnabledChange = {
-//                                            aecEnabled = it
-//                                            aecOn = it
-//                                        },
-//                                        onHowlingEnabledChange = {
-//                                            howlingEnabled = it
-//                                            howlingOn = it
-//                                        },
-//                                        onRecordStart = { startStreaming() },
-//                                        onRecordStop = { stopStreaming() }
-//                                    )
-//                                    6 -> SilencerPage(engine = silencerEngine)
-                                }
-                            }
+                            0 -> FunctionPageContent(
+                                currentPage = functionPage,
+                                onSelectPage = { functionPage = it },
+                                onBack = { functionPage = null },
+                                imuVm = imuVm,
+                                ble = ble,
+                                hasGyro = gyro != null,
+                                hasAccel = accel != null,
+                                drawVm = drawVm,
+                                drawTracker = drawTracker
+                            )
                             1 -> AboutPage(versionName = BuildConfig.VERSION_NAME)
                             2 -> SettingsPage(
                                 forcePortrait = forcePortrait,
@@ -440,5 +399,95 @@ class MainActivity : ComponentActivity() {
         const val SAMPLE_RATE = 44100
         const val CHUNK_SAMPLES = 512
         const val MAX_SAMPLE = 32768f
+    }
+}
+
+@Composable
+private fun FunctionPageContent(
+    currentPage: String?,
+    onSelectPage: (String) -> Unit,
+    onBack: () -> Unit,
+    imuVm: ImuViewModel,
+    ble: BleController,
+    hasGyro: Boolean,
+    hasAccel: Boolean,
+    drawVm: DrawViewModel,
+    drawTracker: OrientationTracker
+) {
+    Column(Modifier.fillMaxSize()) {
+        if (currentPage != null) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = "返回"
+                    )
+                }
+                Text(
+                    text = "功能 > ${
+                        when (currentPage) {
+                            "imu" -> "转小球"
+                            "draw" -> "绘画"
+                            "qr" -> "二维码定位"
+                            "depth" -> "深度估计"
+                            "ai" -> "深度学习"
+                            "script" -> "脚本绘图"
+                            else -> currentPage
+                        }
+                    }",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+            when (currentPage) {
+                "imu" -> ImuBlePage(imuVm, ble, hasGyro, hasAccel)
+                "draw" -> DrawPage(drawVm, drawTracker)
+                "qr" -> QrPosePage()
+                "depth" -> DepthPage()
+                "ai" -> TinyTorchPage()
+                "script" -> QuickJSPage()
+            }
+        } else {
+            val scroll = rememberScrollState()
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scroll)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                FunctionCard("转小球", "IMU 小球 + BLE 遥控") { onSelectPage("imu") }
+                FunctionCard("绘画", "FOSS 版 AR 画线") { onSelectPage("draw") }
+                FunctionCard("二维码定位", "同帧多码位姿估计") { onSelectPage("qr") }
+                FunctionCard("深度估计", "端侧单目深度估计") { onSelectPage("depth") }
+                FunctionCard("深度学习", "TinyTorch 端上训练") { onSelectPage("ai") }
+                FunctionCard("脚本绘图", "QuickJS 指令绘图") { onSelectPage("script") }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FunctionCard(title: String, subtitle: String, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            Text(
+                subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }

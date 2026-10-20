@@ -32,6 +32,7 @@ androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", 
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
 zxing-core = { group = "com.google.zxing", name = "core", version = "3.5.3" }
+quickjs-android = { group = "io.github.taoweiji.quickjs", name = "quickjs-android", version = "1.4.6" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

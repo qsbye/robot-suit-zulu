@@ -94,6 +94,8 @@ dependencies {
     implementation(libs.androidx.camera.view)
     // ZXing（二维码定位页，Apache-2.0）
     implementation(libs.zxing.core)
+    // QuickJS（脚本绘图页，Apache-2.0）
+    implementation(libs.quickjs.android)
     debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
