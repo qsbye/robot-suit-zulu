@@ -33,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import cn.qsbye.robot_suit_zulu.depth.DepthPage
 import cn.qsbye.robot_suit_zulu.dsp.HowlingSuppressor
 import cn.qsbye.robot_suit_zulu.dsp.NlmsAec
 import cn.qsbye.robot_suit_zulu.draw.DrawPage
@@ -155,11 +156,16 @@ class MainActivity : ComponentActivity() {
                             Tab(
                                 selected = selectedTab == 5,
                                 onClick = { selectTab(5) },
-                                text = { Text("关于") }
+                                text = { Text("深度估计") }
                             )
                             Tab(
                                 selected = selectedTab == 6,
                                 onClick = { selectTab(6) },
+                                text = { Text("关于") }
+                            )
+                            Tab(
+                                selected = selectedTab == 7,
+                                onClick = { selectTab(7) },
                                 text = { Text("设置") }
                             )
                         }
@@ -194,8 +200,9 @@ class MainActivity : ComponentActivity() {
                             )
                             3 -> DrawPage(vm = drawVm, tracker = drawTracker)
                             4 -> QrPosePage()
-                            5 -> AboutPage(versionName = BuildConfig.VERSION_NAME)
-                            6 -> SettingsPage(
+                            5 -> DepthPage()
+                            6 -> AboutPage(versionName = BuildConfig.VERSION_NAME)
+                            7 -> SettingsPage(
                                 forcePortrait = forcePortrait,
                                 onForcePortraitChange = { updateForcePortrait(it) }
                             )
