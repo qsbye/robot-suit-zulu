@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -437,6 +438,9 @@ private fun FunctionPageContent(
                             "depth" -> "深度估计"
                             "ai" -> "深度学习"
                             "script" -> "脚本绘图"
+                            "scriptvision" -> "脚本视觉"
+                            "hummingbird" -> "蜂鸟无人机"
+                            "recon" -> "侦查无人机"
                             else -> currentPage
                         }
                     }",
@@ -450,6 +454,25 @@ private fun FunctionPageContent(
                 "depth" -> DepthPage()
                 "ai" -> TinyTorchPage()
                 "script" -> QuickJSPage()
+                "scriptvision" -> PlannedFeaturePage(
+                    summary = "OpenMV for Android：QuickJS 替代 MicroPython 作脚本引擎，" +
+                        "纯 Kotlin 算子库对标 imlib（灰度/二值化/色块/二维码/Hough/模板匹配），" +
+                        "Compose IDE 集成编辑器、实时预览与阈值调试，识别结果经 BLE 对外发布——" +
+                        "手机即摄像头 + 算力 + IDE 一体的可编程视觉传感器。",
+                    status = "功能规划中，暂不实现（sections/exp7-openmv-for-android）"
+                )
+                "hummingbird" -> PlannedFeaturePage(
+                    summary = "昆虫式视觉循迹返航：去程记录 16 字节 Fourier 压缩全景快照，" +
+                        "返程用里程计粗走 + 视觉归巢精修交替消漂移，百米路线内存开销约 1KB。" +
+                        "参考 Science Robotics 2024《Visual route following for tiny autonomous robots》。",
+                    status = "功能规划中，暂不实现（sections/exp8-hummingbird-drone）"
+                )
+                "recon" -> PlannedFeaturePage(
+                    summary = "睿抗「空中侦察」任务链：自主起飞 → 穿越双障碍 → 绕柱 → " +
+                        "悬停识别目标编号牌与真假目标 → 激光攻击正确目标 → 返航降落。" +
+                        "手机作机载协同计算机，复用二维码定位、深度估计、脚本引擎与 BLE 链路。",
+                    status = "任务规划中，暂不实现（sections/exp9-reconnaissance-drone）"
+                )
             }
         } else {
             val scroll = rememberScrollState()
@@ -466,8 +489,29 @@ private fun FunctionPageContent(
                 FunctionCard("深度估计", "端侧单目深度估计") { onSelectPage("depth") }
                 FunctionCard("深度学习", "TinyTorch 端上训练") { onSelectPage("ai") }
                 FunctionCard("脚本绘图", "QuickJS 指令绘图") { onSelectPage("script") }
+                FunctionCard("脚本视觉", "OpenMV for Android（规划）") { onSelectPage("scriptvision") }
+                FunctionCard("蜂鸟无人机", "昆虫式视觉循迹返航（规划）") { onSelectPage("hummingbird") }
+                FunctionCard("侦查无人机", "室内自主空中侦察（规划）") { onSelectPage("recon") }
             }
         }
+    }
+}
+
+@Composable
+private fun PlannedFeaturePage(summary: String, status: String) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+    ) {
+        Text(
+            status,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(summary, style = MaterialTheme.typography.bodyMedium)
     }
 }
 
