@@ -18,3 +18,6 @@ keystore.properties
 robot-suit-zulu-release.keystore
 *.keystore
 *.jks
+
+# 参考 HTML 文章（大体积，不入库）
+reference/*.html
