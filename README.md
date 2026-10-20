@@ -166,6 +166,23 @@
 
 **已知限制**：纯 CPU float32、朴素三重循环 matmul、无卷积算子；教学与范式验证用途，非生产训练。
 
+### 实验六：QuickJS 端上脚本绘图（On-device Script Plotting）✅
+
+> 参考 [摸鱼笔记[11]-使用quickjs设计绘图指令绘制机器视觉结果图](https://www.cnblogs.com/qsbye/p/19577773)；纯 Kotlin + Jetpack Compose + [taoweiji/quickjs-android](https://github.com/taoweiji/quickjs-android)（Apache-2.0），工程位于 [`sections/exp6-quickjs-editor/`](sections/exp6-quickjs-editor/)
+
+**目标**：在 Android 端复刻博客中 CameraViewerAutoWeld 的 Cognex 风格绘图指令集——JavaScript 脚本通过 `PlotLine`/`PlotCircle`/`PlotString`/`PlotPolygon`/`PlotPoint` 绘制机器视觉标注，实现"改脚本即看效果"的快速迭代。
+
+**实现**：
+
+1. **QuickJS 引擎**：`io.github.taoweiji.quickjs:quickjs-android:1.4.6`（Maven Central），注册 5 个 Plot 函数 + `Clear`/`print` 为全局 JS 函数
+2. **指令模式**：每个 Plot 调用生成一个 `DrawingCommand`（对应博客的指令收集器模式），脚本执行完毕后统一在 Compose Canvas 上渲染
+3. **坐标映射**：图像原始分辨率（5120×5120）→ 屏幕坐标自动缩放，线宽/字号随缩放同步调整
+4. **UI**：Compose 多行脚本编辑器（等宽字体）+ 运行/重置按钮 + 预览画布 + 控制台输出
+
+**与博客桌面版的差异**：Swing `Graphics2D` → Compose `DrawScope`；`AffineTransform` → 简单 scale/offset 数学；`RSyntaxTextArea` → Compose `BasicTextField`；MQTT 数据源 → 本地脚本执行（联动扩展预留）。
+
+**已知限制**：无语法高亮（Compose TextField 原生不支持）；无图像底图（ShowImage 未实现）；消息源为本地空对象（非 MQTT）。
+
 ## 目录结构
 
 ```

@@ -45,4 +45,5 @@ GitHub [keith2018/TinyTorch](https://github.com/keith2018/TinyTorch) 工程的�
 | Compose Desktop（JetBrains） | Apache-2.0 |
 | CameraX（`sections/exp3-ar-draw-line/` 使用） | Apache-2.0 |
 | ZXing core（`sections/exp1-qrcode-pose-estimate/` 与主 app 二维码定位页使用） | Apache-2.0 |
+| quickjs-android（`sections/exp6-quickjs-editor/` 使用） | Apache-2.0 |
 | JUnit 4（仅测试） | EPL-1.0 |
