@@ -28,6 +28,10 @@ GitHub 第三方 SLAM AR Android 工程的完整副本，原仓库**未附带许
 - `monocular_depth_map.jpg`、`waveform.png`：项目演示与 Logo 素材。
 - `story_*.jpg`、`server-fan-noise*.m4a`：参考素材，版权归原作者。
 
+## 6. reference/DepthART-main/
+
+GitHub [AIRI-Institute/DepthART](https://github.com/AIRI-Institute/DepthART) 工程的完整副本（论文 *DepthART: Monocular Depth Estimation as Autoregressive Refinement Task*，arXiv:2409.15010），以 [MIT License](reference/DepthART-main/LICENSE) 授权，Copyright (c) 2024 AIRI。本仓库仅作端侧深度估计实验（实验四）的技术参考收录；原仓库的数据集下载链接与预训练权重（VAR d16 / VQ-VAE，源自 FoundationVision/VAR）不随本仓库分发。
+
 ## 运行时依赖（构建时由 Gradle 自动拉取，不随本仓库分发）
 
 | 依赖 | 许可证 |
@@ -36,4 +40,5 @@ GitHub 第三方 SLAM AR Android 工程的完整副本，原仓库**未附带许
 | Kotlin（JetBrains） | Apache-2.0 |
 | Compose Desktop（JetBrains） | Apache-2.0 |
 | CameraX（`sections/exp3-ar-draw-line/` 使用） | Apache-2.0 |
+| ZXing core（`sections/exp1-qrcode-pose-estimate/` 与主 app 二维码定位页使用） | Apache-2.0 |
 | JUnit 4（仅测试） | EPL-1.0 |

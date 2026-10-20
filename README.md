@@ -63,23 +63,25 @@
 
 ## 规划实验
 
-### 实验一：基于二维码的引导定位（QR-guided Localization）🚧
+### 实验一：基于二维码的引导定位（QR-guided Localization）（已实现）✅
 
-> 联动 [slambook2.rs](https://github.com/ByeIO/slambook2.rs) + [bye.rosette.rs](https://github.com/ByeIO/bye.rosette.rs)
+> 联动 [slambook2.rs](https://github.com/ByeIO/slambook2.rs) + [bye.rosette.rs](https://github.com/ByeIO/bye.rosette.rs)（话题输出规划中）；纯 Kotlin + Jetpack Compose + CameraX + ZXing，识别方法参照 WaveSend——工程位于 [`sections/exp1-qrcode-pose-estimate/`](sections/exp1-qrcode-pose-estimate/)，并已集成为主 app 的「二维码定位」标签页
 
-**目标**：识别场景中的二维码，根据其透视畸变估计相机（机器人）相对二维码的 6DoF 位姿，并规划一条到达二维码的路径，以**蓝色曲线**实时绘制在预览画面上。
+**目标**：识别场景中的二维码（支持同帧多码、任意可识别尺寸），根据透视畸变估计相机（机器人）相对码面的位姿，并生成一条到达**最近二维码**的路径，以**蓝色曲线**实时绘制在预览画面上。
 
 **流程**：
 
-1. **检测**：逐帧检测二维码（如 AprilTag / QR），提取四角像素坐标
-2. **位姿估计**：利用码面已知物理尺寸 + 透视畸变，由单应矩阵（Homography）初始化，再用 PnP（EPnP + 迭代优化）求解相机坐标系下二维码的相对位姿 `T_cw`
-3. **路径规划**：将目标位姿投影到地面平面（2D SE(2)），结合当前估计位姿生成平滑可达路径（贝塞尔 / 最小 jerk 曲线）
-4. **可视化**：路径以蓝色曲线叠加到相机预览画面（或俯视图），随位姿更新实时重绘
-5. **联动输出**：位姿经 slambook2.rs 的 SE(3) 类型规整后，打包为 `geometry_msgs/PoseStamped`、`nav_msgs/Path` 话题，由 Rosette 发布，webviz / 底盘节点订阅执行
+1. **检测**：CameraX `ImageAnalysis` 逐帧送 ZXing `GenericMultipleBarcodeReader` 多码解码（Hybrid → Global 直方图两级候选二值化）；由 3 个定位图案中心按平行四边形模型推算第 4 角
+2. **位姿估计**：四角像素 ↔ 已知物理边长的平面方形做 4 点 DLT 求单应矩阵（h33=1，8×8 高斯消元），分解 `H = [r1 r2 t]` 得相机系位姿 `T_cw`（Gram-Schmidt 正交化 + z 正向约束），按码内容做 EMA 平滑抑制抖动
+3. **路径规划**：相机系下从镜头前方到最近二维码中心的三次贝塞尔曲线
+4. **可视化**：每个码画绿色锁定框 + 内容标签，蓝色路径曲线 + 红色目标点指向最近码；顶部状态条实时显示检出数量与最近码内容 / 距离
+5. **联动输出**（规划中）：位姿经 slambook2.rs 的 SE(3) 类型规整后，打包为 `geometry_msgs/PoseStamped` 话题，由 Rosette 发布，webviz / 底盘节点订阅执行
 
-**预期效果**：手机对着墙上的二维码缓慢移动，画面中蓝色曲线始终平滑地"指向"并延伸至二维码中心；移动到不同位置，路径实时跟随重算。
+**预期效果**：手机对着墙上的二维码缓慢移动，画面中蓝色曲线始终平滑地"指向"并延伸至二维码中心；同帧多码时自动锁定最近的一个，路径实时跟随重算。
 
-**用到的 slambook2.rs 知识点**：相机模型与内参标定（ch5）、对极几何与位姿估计（ch7）、李群李代数与曲线拟合（ch4/ch6）。
+**用到的 slambook2.rs 知识点**：相机模型与内参（ch5，固定 62° 视场角近似）、单应与位姿估计（ch7，单应分解替代 EPnP）。
+
+**已知限制**：角点取自定位图案中心（非码面真实角点）、内参未标定，位姿精度为演示级，距离为相对量；详细说明见 [section README](sections/exp1-qrcode-pose-estimate/README.md)。
 
 ### 实验二：IMU 小球 + BLE 遥控 esp32（已实现）✅
 
@@ -119,6 +121,32 @@
 4. **8 色色板 + 三档笔宽 + 撤销/清空 + 追踪状态指示灯**，无相机权限时降级为深色背景天空画线模式
 
 **已知限制**：3DoF（无平移视差）、旋转矢量长时缓慢漂移、FOV 为 62° 近似值——详见 [section README](sections/exp3-ar-draw-line/README.md)。
+
+### 实验四：端侧单目深度估计（On-device Monocular Depth Estimation）🚧
+
+> 参考 [DepthART](https://github.com/AIRI-Institute/DepthART)（arXiv:2409.15010，MIT License）——原仓库已存档至 [`reference/DepthART-main/`](reference/DepthART-main/)
+
+**目标**：把 DepthART「单目深度估计 = 自回归细化任务」的范式搬到手机端——复用图像生成模型 VAR 的下一尺度预测先验，端上实时输出逐像素相对深度，伪彩色深度图叠加相机预览，并与实验一的二维码位姿联动做绝对尺度校正。
+
+**原理**（DepthART 的三层拆解）：
+
+1. **深度离散化**：预训练 VQ-VAE（`vae_ch160v4096z32`）把深度图编码为多尺度 token 金字塔——从 1×1 的全局摘要到细尺度的局部细节
+2. **自回归细化**：VAR d16 以 RGB 图像为条件，按尺度从粗到细逐级预测深度 token；DepthART 的关键改动是把任务定义为「细化」——上一尺度的粗糙深度在下一尺度被修正补全而非从零生成，让生成先验与深度回归任务对齐
+3. **解码还原**：VQ-VAE 解码器将最细尺度 token 还原为连续深度图
+
+**流程**：
+
+1. **复现训练**：Hypersim 合成数据集 + 官方预训练权重（VQ-VAE / VAR d16），`tools/dist_train.sh train_depthART.yaml` 训练；`tools/eval.py` 在 NYUv2 / ETH3D / iBims-1 / TUM 上复算 AbsRel、δ<1.25 并与论文对齐
+2. **端侧转换**：PyTorch → ONNX 导出 → FP16 / INT8 量化 → ONNX Runtime Mobile / TFLite（NNAPI / NPU 委托）；延迟超标时蒸馏到更小骨干
+3. **端侧推理**：CameraX 逐帧 → letterbox 预处理 → 推理 → 深度图上采样对齐
+4. **可视化**：turbo 伪彩色深度图实时叠加预览，原图 / 深度 / 混合三档切换
+5. **联动输出**：与实验一联动——二维码已知物理边长提供绝对尺度，将相对深度校正为米制深度；深度图规整为点云 / BEV，经 Rosette 以 `sensor_msgs/Image` 话题发布，供避障与建图节点订阅
+
+**预期效果**：手机对准室内场景，伪彩色深度图实时跟随（近暖远冷，遮挡边界清晰）；场景中放置二维码后，深度读数经尺度校正接近米制真值——实验一的几何位姿与实验四的学习深度互相校验。
+
+**对照与知识点**：经典几何法单目稠密重建（slambook2.rs ch12 极线搜索 + 深度滤波）对照生成式学习法（VQ token + 自回归 Transformer）；端侧量化部署（INT8 / FP16、NPU 委托）。
+
+**已知限制**：单目深度本质为相对量，绝对尺度依赖外部校正（实验一联动补齐）；VAR d16 + VQ-VAE 参数量对中端机型有压力，需在精度与帧率间权衡。
 
 ## 目录结构
 
