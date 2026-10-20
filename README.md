@@ -183,6 +183,42 @@
 
 **已知限制**：无语法高亮（Compose TextField 原生不支持）；无图像底图（ShowImage 未实现）；消息源为本地空对象（非 MQTT）。
 
+### 实验七：OpenMV for Android——手机端脚本化机器视觉（功能规划）📋
+
+> 参考 [OpenMV](https://github.com/openmv/openmv)（MIT License，原仓库已存档至 [`reference/openmv-master/`](reference/openmv-master/)）——把 OpenMV「脚本驱动的嵌入式视觉硬件」范式搬到手机：**手机本身就是摄像头 + 算力 + IDE 一体的机器视觉智能硬件**，不再需要独立摄像头模块。工程目录 [`sections/exp7-openmv-for-android/`](sections/exp7-openmv-for-android/)（占位，暂不实现）
+
+**目标**：复刻 OpenMV 的核心体验——在设备上用脚本快速搭视觉流水线，改脚本即看结果——但脚本引擎用 QuickJS（复用实验六）替代 MicroPython，视觉算子用纯 Kotlin 在 CameraX 帧流上实现，手机同时承担"IDE（编辑器 + 帧缓冲预览 + 阈值调试）"与"视觉硬件（采集 + 处理 + 对外输出）"双重角色。
+
+**与 OpenMV 的对位映射**：
+
+| OpenMV 概念 | 手机端对应 |
+| --- | --- |
+| MicroPython 脚本 | QuickJS JavaScript 脚本（实验六引擎扩展） |
+| imlib 算法库（C 实现） | 纯 Kotlin 算子库，逐帧作用于 CameraX ImageAnalysis 帧 |
+| OpenMV IDE（帧缓冲实时预览、阈值编辑器、直跑脚本） | Compose IDE：脚本编辑器 + 实时预览 + 结果叠加层 |
+| RPC 库（UART/I2C/SPI/CAN，同步头+通道+opcode+CRC 包） | BLE Nordic UART（实验二）/ WiFi 对外发布结构化结果，包格式参照 [docs/protocol.md](reference/openmv-master/docs/protocol.md) |
+| `print()` → USB VCP | 控制台输出面板（实验六已有） |
+
+**规划脚本 API**（JS 侧，参照 imlib 能力清单分期实现）：
+
+1. **图像基元**：`image.grayscale()` / `image.binary(threshold)` / `image.erode/dilate` —— 灰度、二值化、形态学
+2. **色块追踪**：`image.find_blobs(阈值, roi)` → 返回色块质心/包围盒/面积（对标 imlib `blob.c`，巡线/颜色目标场景）
+3. **码识别**：`image.find_qrcodes()`（复用实验一 ZXing）→ 内容 + 四角 + 位姿；后续可扩展 AprilTag（远距鲁棒性优于 QR，实验九候选）
+4. **几何与运动**：`image.find_lines()`（Hough）、`image.find_circles()`、帧间相位相关位移估计（对标 `phasecorrelation.c`，可做光流式里程计）
+5. **模板与特征**：`image.find_template()`、`image.find_keypoints()`（AGAST/FAST/ORB 对标）
+6. **绘图叠加**：复用实验六 `PlotLine`/`PlotCircle`/`PlotString` 指令集，脚本检测结果直接画在预览上
+
+**规划流程**：
+
+1. **流水线骨架**：CameraX 帧 → Kotlin 算子链（每帧一个 `image` 对象传入 JS）→ 脚本 `process(image)` 返回标注 → Compose 叠加渲染，目标 ≥10fps
+2. **IDE 交互**：编辑器 + 预览分屏；阈值参数面板（滑条实时改 JS 全局变量，无需重跑脚本——对应 OpenMV IDE 阈值编辑器）
+3. **对外输出**：识别结果（色块坐标/码内容/位姿）经 BLE 按 OpenMV RPC 风格包格式发布，供 esp32 底盘/飞控消费；与 Rosette 话题桥对齐预留
+4. **性能策略**：算子先纯 Kotlin 实现保 FOSS，热点（如二值化、卷积）后续可选 RenderScript 替代方案或 NNAPI 委托（保持开源栈）
+
+**预期效果**：打开「脚本视觉」页，粘贴一段 OpenMV 风格的找色块脚本（语法改 JS），手机对着彩色目标即实时框出质心轨迹；改阈值滑条立即生效——一部旧手机即成为可编程视觉传感器。
+
+**已知限制**：JS 逐帧回调有 JNI/引擎开销，帧率上限低于原生 C 实现（OpenMV 在 STM32H7 上 blob 可达 30fps+）；imlib 的 SIMD 汇编优化无法直接复用，热点算子需重写；本地存档的 openmv-master 顶层缺 LICENSE 文件，引用其代码片段前需核对上游许可。
+
 ### 实验八：蜂鸟无人机——昆虫式视觉循迹返航（Hummingbird Drone: Insect-inspired Visual Route Following）（功能规划）📋
 
 > 参考 [Visual route following for tiny autonomous robots](https://www.science.org/doi/10.1126/scirobotics.adk0310)（van Dijk et al., *Science Robotics* 9, eadk0310, 2024；TU Delft，56g Crazyflie Brushless，STM32F4/192KB RAM 上实现）。工程目录 [`sections/exp8-hummingbird-drone/`](sections/exp8-hummingbird-drone/)（占位，暂不实现）
