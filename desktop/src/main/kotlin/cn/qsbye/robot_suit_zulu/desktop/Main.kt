@@ -36,7 +36,7 @@ fun main() = application {
             exitApplication()
         },
         state = windowState,
-        title = "RobotSuitZulu音函 (macOS)"
+        title = "RobotSuitZulu玑函 (macOS)"
     ) {
         App()
     }

@@ -148,6 +148,32 @@
 
 **已知限制**：单目深度本质为相对量，绝对尺度依赖外部校正（实验一联动补齐）；VAR d16 + VQ-VAE 参数量对中端机型有压力，需在精度与帧率间权衡。
 
+### 实验五：端上微型训练框架（TinyTorch On-device）🚧
+
+> 参考 [TinyTorch](https://github.com/keith2018/TinyTorch)（MIT License）——原仓库已存档至 [`reference/TinyTorch-main/`](reference/TinyTorch-main/)，配套解读文档：[手写一个神经网络训练框架 (TinyTorch)](docs/tinytorch-neural-network-training-framework-robot9.md)
+
+**目标**：把 TinyTorch「Tensor/Function 计算图 + 自动微分 + Module/Optimizer」的最小内核用纯 Kotlin 在 Android 端实现——将实验四的固定结构 MLP（DepthNet + AdamTrainer）升级为支持任意算子组合的通用微型训练框架，MNIST 级别任务全流程端上闭环（训练、评估、保存、增量学习），规划工程位于 `sections/exp5-tiny-torch-on-device/`。
+
+**原理**（TinyTorch 四层内核的 Kotlin 映射）：
+
+1. **Tensor/TensorImpl 分层**：底层 float32 张量（shape/strides/一维存储）只做数值运算；上层 Tensor 挂 AutogradMeta（grad + gradFn），梯度相关逻辑与数据解耦
+2. **Function 即计算图节点**：每个算子实现 forward/backward，前向调用时把输入的 gradFn 链入 `nextFunctions` 构建反向依赖图；叶子节点 FuncLeaf 的 backward 负责把梯度写回 Tensor
+3. **拓扑排序反传**：`backward()` 从 gradFn 出发拓扑排序生成 backwardGraph 再逐个执行——比实验四的固定层序反传更通用，支持任意算子组合与分支结构
+4. **Module/Optimizer/Scheduler/Data**：Module 递归注册子模块并汇总 `parameters()`（train/eval 模式区分 Dropout 等行为）；Adam/SGD 就地更新参数；DataLoader 提供 batch/shuffle/迭代器
+
+**流程**：
+
+1. **内核实现**：纯 Kotlin 实现 TensorImpl（broadcast/reduce/matmul，strides 手写遍历）、自动微分引擎、MNIST 必需算子集（加减乘除/relu/log_softmax/linear/flatten）
+2. **训练链路**：MNIST → DataLoader → train loop（model.train()/eval()）→ Adam → StepLR；损失与准确率曲线实时绘制（复用实验四训练面板范式）
+3. **能力验证**：与实验四专用 MLP 对照同任务下的收敛速度/内存占用；实现 checkpoint 序列化保存/加载（对照 TinyTorch Serializer）
+4. **联动输出**（规划中）：训练产物供实验四推理复用；训练进度/loss 经 Rosette 话题发布供桌面端监控
+
+**预期效果**：手机上几十秒从零训练 MNIST MLP 到 90%+ 准确率，全程无第三方框架依赖；同任务下与实验四的专用实现可对照，验证「通用计算图」在端上的代价与收益。
+
+**对照与知识点**：TinyTorch（C++，CPU/CUDA/NCCL 三分发）vs 本实验（Kotlin，纯 CPU 手机端）；TensorIterator 的 broadcast 机制对照一维数组 + strides 手写遍历；教学框架与生产框架（PyTorch / ONNX Runtime Training）的能力边界。
+
+**已知限制**：纯 CPU float32、无 SIMD/NNAPI 委托，算子覆盖仅限 MNIST 必需集合，卷积算子延后；目标是教学与范式验证，非生产训练。
+
 ## 目录结构
 
 ```

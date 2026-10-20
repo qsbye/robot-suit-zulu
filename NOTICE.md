@@ -32,6 +32,10 @@ GitHub 第三方 SLAM AR Android 工程的完整副本，原仓库**未附带许
 
 GitHub [AIRI-Institute/DepthART](https://github.com/AIRI-Institute/DepthART) 工程的完整副本（论文 *DepthART: Monocular Depth Estimation as Autoregressive Refinement Task*，arXiv:2409.15010），以 [MIT License](reference/DepthART-main/LICENSE) 授权，Copyright (c) 2024 AIRI。本仓库仅作端侧深度估计实验（实验四）的技术参考收录；原仓库的数据集下载链接与预训练权重（VAR d16 / VQ-VAE，源自 FoundationVision/VAR）不随本仓库分发。
 
+## 7. reference/TinyTorch-main/
+
+GitHub [keith2018/TinyTorch](https://github.com/keith2018/TinyTorch) 工程的完整副本（从零手写 C++ 神经网络训练框架），以 [MIT License](reference/TinyTorch-main/LICENSE) 授权，Copyright (c) 2024 Keith。本仓库仅作端上微型训练框架实验（实验五）的技术参考收录；随附 MNIST 数据集（`examples/mnist/data/`）为原始 Yann LeCun 公开数据，版权归原作者。
+
 ## 运行时依赖（构建时由 Gradle 自动拉取，不随本仓库分发）
 
 | 依赖 | 许可证 |

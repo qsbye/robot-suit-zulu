@@ -247,7 +247,7 @@ fun AboutPage(
         Spacer(Modifier.height(16.dp))
 
         Text(
-            text = "RobotSuitZulu音函",
+            text = "RobotSuitZulu玑函",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold
         )
