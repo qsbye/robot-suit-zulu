@@ -23,9 +23,11 @@ fi
 export JAVA_HOME
 export PATH="$JAVA_HOME/bin:$PATH"
 
-GRADLE="$(command -v gradle || true)"
-[ -z "$GRADLE" ] && GRADLE="$(ls "$HOME"/.gradle/gradle-*/bin/gradle 2>/dev/null | sort -V | tail -1)"
-[ -n "$GRADLE" ] && [ -x "$GRADLE" ] || { echo "未找到 gradle"; exit 1; }
+GRADLE="$STAGE_DIR/gradlew"
+[ -x "$GRADLE" ] || { echo "未找到项目 gradlew"; exit 1; }
+# 统一使用项目 wrapper（gradle-wrapper.properties 锁定版本），
+# 禁止探测系统 gradle——宿主机的 Gradle 9.x 与工程 AGP 8.7.3 不兼容
+# （典型症状: org.gradle.api.internal.HasConvention NoClassDefFoundError）
 
 if [ ! -d "${ANDROID_HOME:-/nonexistent}" ]; then
   export ANDROID_HOME="$HOME/Library/Android/sdk"
@@ -46,7 +48,7 @@ cd "$STAGE_DIR"
   :app:testDebugUnitTest :app:assembleRelease
 
 echo "==> [3/3] 复制 APK 回项目根目录"
-dest="$SRC_DIR/AirFountainZulu-release-${timestamp}.apk"
+dest="$SRC_DIR/RobotSuitZulu-release-${timestamp}.apk"
 cp app/build/outputs/apk/release/app-release.apk "$dest"
 echo "==> 完成: $dest"
 ls -lh "$dest"

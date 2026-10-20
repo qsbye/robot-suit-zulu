@@ -1,4 +1,5 @@
 import java.time.LocalDateTime
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -12,6 +13,13 @@ val generatedVersionName =
 val generatedVersionCode =
     (buildNow.year % 100) * 1_000_000 + buildNow.monthValue * 10_000 + buildNow.dayOfMonth * 100 + buildNow.hour
 
+// Release 签名：项目根 keystore.properties（已 gitignore，不入库）；
+// 文件缺失时回退为未签名 release，保证任何人 clone 后可直接构建
+val keystoreProps = Properties().apply {
+    val f = rootProject.file("keystore.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+
 android {
     namespace = "cn.qsbye.robot_suit_zulu"
     compileSdk = 34
@@ -24,6 +32,17 @@ android {
         versionName = generatedVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        if (keystoreProps.isNotEmpty()) {
+            create("release") {
+                storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
     }
 
     buildFeatures {
@@ -42,6 +61,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (keystoreProps.isNotEmpty()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     compileOptions {

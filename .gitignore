@@ -12,3 +12,9 @@ local.properties
 
 # macOS
 .DS_Store
+
+# Release 签名（含密码，不入库）
+keystore.properties
+robot-suit-zulu-release.keystore
+*.keystore
+*.jks

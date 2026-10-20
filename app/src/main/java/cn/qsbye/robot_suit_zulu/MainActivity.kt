@@ -48,8 +48,10 @@ import kotlin.math.pow
 class MainActivity : ComponentActivity() {
     private var isRecording by mutableStateOf(false)
     private var gainDb by mutableDoubleStateOf(0.0)
-    // 标签索引：0=扩音器（隐藏） 1=消音器（隐藏） 2=转小球 3=绘画 4=二维码定位 5=关于 6=设置
-    private var selectedTab by mutableIntStateOf(2)
+    // 顶层标签索引：0=功能 1=关于 2=设置
+    private var selectedTab by mutableIntStateOf(0)
+    // 功能页子标签索引：0=转小球 1=绘画 2=二维码定位 3=深度估计（4=扩音器 5=消音器已隐藏）
+    private var functionTab by mutableIntStateOf(0)
     private var volume by mutableIntStateOf(0)
     private var maxVolume by mutableIntStateOf(1)
     private var aecEnabled by mutableStateOf(true)
@@ -126,83 +128,95 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Column(Modifier.fillMaxSize()) {
-                        // 标签页可见性：扩音器/消音器已隐藏（代码保留，恢复时取消注释即可）
-                        TabRow(selectedTabIndex = (selectedTab - 2).coerceAtLeast(0)) {
-//                            Tab(
-//                                selected = selectedTab == 0,
-//                                onClick = { selectTab(0) },
-//                                text = { Text("扩音器") }
-//                            )
-//                            Tab(
-//                                selected = selectedTab == 1,
-//                                onClick = { selectTab(1) },
-//                                text = { Text("消音器") }
-//                            )
+                        // 顶层标签页：功能 / 关于 / 设置；四个功能页移入「功能」子标签页
+                        TabRow(selectedTabIndex = selectedTab) {
                             Tab(
-                                selected = selectedTab == 2,
-                                onClick = { selectTab(2) },
-                                text = { Text("转小球") }
+                                selected = selectedTab == 0,
+                                onClick = { selectTab(0) },
+                                text = { Text("功能") }
                             )
                             Tab(
-                                selected = selectedTab == 3,
-                                onClick = { selectTab(3) },
-                                text = { Text("绘画") }
-                            )
-                            Tab(
-                                selected = selectedTab == 4,
-                                onClick = { selectTab(4) },
-                                text = { Text("二维码定位") }
-                            )
-                            Tab(
-                                selected = selectedTab == 5,
-                                onClick = { selectTab(5) },
-                                text = { Text("深度估计") }
-                            )
-                            Tab(
-                                selected = selectedTab == 6,
-                                onClick = { selectTab(6) },
+                                selected = selectedTab == 1,
+                                onClick = { selectTab(1) },
                                 text = { Text("关于") }
                             )
                             Tab(
-                                selected = selectedTab == 7,
-                                onClick = { selectTab(7) },
+                                selected = selectedTab == 2,
+                                onClick = { selectTab(2) },
                                 text = { Text("设置") }
                             )
                         }
 
                         when (selectedTab) {
-                            0 -> LoudspeakerPage(
-                                isRecording = isRecording,
-                                volume = volume,
-                                maxVolume = maxVolume,
-                                gainDb = gainDb,
-                                aecEnabled = aecEnabled,
-                                howlingEnabled = howlingEnabled,
-                                waveformController = waveformController,
-                                onGainChange = { gainDb = it },
-                                onAecEnabledChange = {
-                                    aecEnabled = it
-                                    aecOn = it
-                                },
-                                onHowlingEnabledChange = {
-                                    howlingEnabled = it
-                                    howlingOn = it
-                                },
-                                onRecordStart = { startStreaming() },
-                                onRecordStop = { stopStreaming() }
-                            )
-                            1 -> SilencerPage(engine = silencerEngine)
-                            2 -> ImuBlePage(
-                                vm = imuVm,
-                                ble = ble,
-                                hasGyro = gyro != null,
-                                hasAccel = accel != null
-                            )
-                            3 -> DrawPage(vm = drawVm, tracker = drawTracker)
-                            4 -> QrPosePage()
-                            5 -> DepthPage()
-                            6 -> AboutPage(versionName = BuildConfig.VERSION_NAME)
-                            7 -> SettingsPage(
+                            0 -> Column {
+                                // 功能页子标签页：扩音器/消音器已隐藏（代码保留，恢复时取消注释即可）
+                                TabRow(selectedTabIndex = functionTab) {
+//                                    Tab(
+//                                        selected = functionTab == 4,
+//                                        onClick = { functionTab = 4 },
+//                                        text = { Text("扩音器") }
+//                                    )
+//                                    Tab(
+//                                        selected = functionTab == 5,
+//                                        onClick = { functionTab = 5 },
+//                                        text = { Text("消音器") }
+//                                    )
+                                    Tab(
+                                        selected = functionTab == 0,
+                                        onClick = { functionTab = 0 },
+                                        text = { Text("转小球") }
+                                    )
+                                    Tab(
+                                        selected = functionTab == 1,
+                                        onClick = { functionTab = 1 },
+                                        text = { Text("绘画") }
+                                    )
+                                    Tab(
+                                        selected = functionTab == 2,
+                                        onClick = { functionTab = 2 },
+                                        text = { Text("二维码定位") }
+                                    )
+                                    Tab(
+                                        selected = functionTab == 3,
+                                        onClick = { functionTab = 3 },
+                                        text = { Text("深度估计") }
+                                    )
+                                }
+                                when (functionTab) {
+                                    0 -> ImuBlePage(
+                                        vm = imuVm,
+                                        ble = ble,
+                                        hasGyro = gyro != null,
+                                        hasAccel = accel != null
+                                    )
+                                    1 -> DrawPage(vm = drawVm, tracker = drawTracker)
+                                    2 -> QrPosePage()
+                                    3 -> DepthPage()
+//                                    4 -> LoudspeakerPage(
+//                                        isRecording = isRecording,
+//                                        volume = volume,
+//                                        maxVolume = maxVolume,
+//                                        gainDb = gainDb,
+//                                        aecEnabled = aecEnabled,
+//                                        howlingEnabled = howlingEnabled,
+//                                        waveformController = waveformController,
+//                                        onGainChange = { gainDb = it },
+//                                        onAecEnabledChange = {
+//                                            aecEnabled = it
+//                                            aecOn = it
+//                                        },
+//                                        onHowlingEnabledChange = {
+//                                            howlingEnabled = it
+//                                            howlingOn = it
+//                                        },
+//                                        onRecordStart = { startStreaming() },
+//                                        onRecordStop = { stopStreaming() }
+//                                    )
+//                                    5 -> SilencerPage(engine = silencerEngine)
+                                }
+                            }
+                            1 -> AboutPage(versionName = BuildConfig.VERSION_NAME)
+                            2 -> SettingsPage(
                                 forcePortrait = forcePortrait,
                                 onForcePortraitChange = { updateForcePortrait(it) }
                             )
@@ -222,8 +236,11 @@ class MainActivity : ComponentActivity() {
      */
     private fun selectTab(index: Int) {
         if (index == selectedTab) return
-        if (selectedTab == 0) stopStreaming()
-        if (selectedTab == 1) silencerEngine.stopAll()
+        // 离开功能页时停掉音频组件（扩音器/消音器已隐藏，防御性调用）
+        if (selectedTab == 0) {
+            stopStreaming()
+            silencerEngine.stopAll()
+        }
         selectedTab = index
     }
 
