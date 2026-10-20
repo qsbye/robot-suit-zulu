@@ -211,7 +211,7 @@ fun AboutPage(
     modifier: Modifier = Modifier
 ) {
     val uriHandler = LocalUriHandler.current
-    val linkUrl = "https://github.com/qsbye/audio-suit-zulu/tree/android"
+    val linkUrl = "https://github.com/qsbye/robot-suit-zulu/tree/main"
     val linkText = buildAnnotatedString {
         pushStyle(SpanStyle(color = CanadianLake))
         append(linkUrl)
