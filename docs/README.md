@@ -1,6 +1,6 @@
 # 参考资料
 
-本目录收录回声消除（AEC）、主动噪声消除（ANC）、降噪（ANS/NS）等音频算法学习资料，以及单目深度估计、神经网络可解释性等 AI 前沿文章，均由本地保存的网页 HTML 经 [markitdown](https://github.com/microsoft/markitdown)（uv tool 安装）转换为 Markdown 并人工整理排版（自 2026-10-02 起陆续归档），文首标注原文来源。图片在原网页中为内联资源的，转换后以占位形式呈现；原图为远程链接的保留原链接，需要时请访问原文链接查看。
+本目录收录回声消除（AEC）、主动噪声消除（ANC）、降噪（ANS/NS）等音频算法学习资料，以及单目深度估计、神经网络可解释性、手写神经网络训练框架等 AI 前沿文章，均由本地保存的网页 HTML 经 [markitdown](https://github.com/microsoft/markitdown)（uv tool 安装）转换为 Markdown 并人工整理排版（自 2026-10-02 起陆续归档），文首标注原文来源。图片在原网页中为内联资源的，转换后以占位形式呈现；原图为远程链接的保留原链接，需要时请访问原文链接查看。
 
 ## 目录
 
@@ -13,6 +13,7 @@
 | [主动噪声消除（ANC）算法研究（译文）](anc-algorithm-research-cnblogs.md) | 窄带/宽带前馈与反馈 ANC 系统、Wiener 滤波器、LMS/FxLMS/FxRLS 算法与 Python 仿真，含英文原文附录 | [博客园 · qsBye 译文](https://www.cnblogs.com/qsbye/p/18385474) |
 | [把 Depth Anything 砍到 6M，深度估计终于能跑进 Jetson](depthart-tiny-depth-estimation-jetson-aitnt.md) | 6M 参数级基础深度模型 DepthART：抗偏置数据采样（BRDS）、相机条件化微调（CamFT）、MobileNetV4/SPF 轻量变体与端侧部署 | [AITNT · 机器之心](https://m.aitntnews.com/newDetail.html?newId=29947) |
 | [神经网络可解释性被 AI 解决了？90% 神经元只有一个功能](neural-network-interpretability-weixin.md) | Nick Cammarata 长文解读：多义性再审视、递归泛化、AI 科学家驱动的可解释性研究 | [微信公众号「机器之心」](https://mp.weixin.qq.com/s/_oqtFLpXkFSufQGz-adGHQ) |
+| [手写一个神经网络训练框架 (TinyTorch)](tinytorch-neural-network-training-framework-robot9.md) | C++ 从零实现类 PyTorch 训练框架：Tensor/Function 自动微分、Module/Optimizer/Scheduler、MNIST 完整训练 | [Robot 9 · Keith](https://robot9.me/write-nn-framework-from-scratch-tinytorch/) |
 
 ## 与本项目的关系
 
@@ -21,4 +22,5 @@ RobotSuitZulu（音函）在麦克风实时扩音链路中可参考上述资料�
 - **AEC** 解决扬声器声音回授麦克风导致的回声/啸叫，是扩音类应用的核心问题；
 - **ANC**（主动噪声消除）面向环境噪声的相消干涉，FxLMS/FxRLS 是其自适应滤波核心算法，耳机等场景可参考；
 - **RNNoise / WebRTC ANS** 等轻量方案可用于移动端实时降噪；
+- **TinyTorch** 展示了「不依赖第三方框架、从零手写训练框架」的可行路径——本仓库 exp4 深度估计的纯 Kotlin 端上训练（WaveformMlp + AdamTrainer 范式）与之一脉相承；
 - 具体实现选型需综合考虑算法延迟、设备非线性失真与计算开销。
