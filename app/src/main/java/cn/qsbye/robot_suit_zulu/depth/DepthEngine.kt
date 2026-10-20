@@ -149,6 +149,35 @@ class DepthEngine(
         return out
     }
 
+    /** 保存当前模型参数到 file，返回是否成功 */
+    fun saveModel(file: java.io.File): Boolean {
+        val n = net ?: return false
+        try {
+            java.io.DataOutputStream(file.outputStream().buffered()).use { out ->
+                out.writeInt(n.parameterCount)
+                n.exportParams().forEach(out::writeFloat)
+            }
+            return true
+        } catch (_: Exception) { return false }
+    }
+
+    /** 从 file 恢复模型参数，返回是否成功 */
+    fun loadModel(file: java.io.File): Boolean {
+        if (!file.exists()) return false
+        try {
+            val n = net ?: DepthNet()
+            java.io.DataInputStream(file.inputStream().buffered()).use { inp ->
+                val count = inp.readInt()
+                if (count != n.parameterCount) return false
+                val params = FloatArray(count) { inp.readFloat() }
+                n.importParams(params)
+            }
+            net = n
+            isTrained = true
+            return true
+        } catch (_: Exception) { return false }
+    }
+
     companion object {
         private const val MIN_INTERVAL_MS = 120L
 

@@ -40,6 +40,7 @@ import cn.qsbye.robot_suit_zulu.draw.DrawPage
 import cn.qsbye.robot_suit_zulu.draw.DrawViewModel
 import cn.qsbye.robot_suit_zulu.draw.OrientationTracker
 import cn.qsbye.robot_suit_zulu.qrpose.QrPosePage
+import cn.qsbye.robot_suit_zulu.tinytorch.ui.TinyTorchPage
 import cn.qsbye.robot_suit_zulu.ui.theme.RobotSuitZuluTheme
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -50,7 +51,7 @@ class MainActivity : ComponentActivity() {
     private var gainDb by mutableDoubleStateOf(0.0)
     // 顶层标签索引：0=功能 1=关于 2=设置
     private var selectedTab by mutableIntStateOf(0)
-    // 功能页子标签索引：0=转小球 1=绘画 2=二维码定位 3=深度估计（4=扩音器 5=消音器已隐藏）
+    // 功能页子标签索引：0=转小球 1=绘画 2=二维码定位 3=深度估计 4=深度学习（5=扩音器 6=消音器已隐藏）
     private var functionTab by mutableIntStateOf(0)
     private var volume by mutableIntStateOf(0)
     private var maxVolume by mutableIntStateOf(1)
@@ -152,13 +153,13 @@ class MainActivity : ComponentActivity() {
                                 // 功能页子标签页：扩音器/消音器已隐藏（代码保留，恢复时取消注释即可）
                                 TabRow(selectedTabIndex = functionTab) {
 //                                    Tab(
-//                                        selected = functionTab == 4,
-//                                        onClick = { functionTab = 4 },
+//                                        selected = functionTab == 5,
+//                                        onClick = { functionTab = 5 },
 //                                        text = { Text("扩音器") }
 //                                    )
 //                                    Tab(
-//                                        selected = functionTab == 5,
-//                                        onClick = { functionTab = 5 },
+//                                        selected = functionTab == 6,
+//                                        onClick = { functionTab = 6 },
 //                                        text = { Text("消音器") }
 //                                    )
                                     Tab(
@@ -181,6 +182,11 @@ class MainActivity : ComponentActivity() {
                                         onClick = { functionTab = 3 },
                                         text = { Text("深度估计") }
                                     )
+                                    Tab(
+                                        selected = functionTab == 4,
+                                        onClick = { functionTab = 4 },
+                                        text = { Text("深度学习") }
+                                    )
                                 }
                                 when (functionTab) {
                                     0 -> ImuBlePage(
@@ -192,7 +198,8 @@ class MainActivity : ComponentActivity() {
                                     1 -> DrawPage(vm = drawVm, tracker = drawTracker)
                                     2 -> QrPosePage()
                                     3 -> DepthPage()
-//                                    4 -> LoudspeakerPage(
+                                    4 -> TinyTorchPage()
+//                                    5 -> LoudspeakerPage(
 //                                        isRecording = isRecording,
 //                                        volume = volume,
 //                                        maxVolume = maxVolume,
@@ -212,7 +219,7 @@ class MainActivity : ComponentActivity() {
 //                                        onRecordStart = { startStreaming() },
 //                                        onRecordStop = { stopStreaming() }
 //                                    )
-//                                    5 -> SilencerPage(engine = silencerEngine)
+//                                    6 -> SilencerPage(engine = silencerEngine)
                                 }
                             }
                             1 -> AboutPage(versionName = BuildConfig.VERSION_NAME)

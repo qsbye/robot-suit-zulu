@@ -258,6 +258,39 @@ fun DepthScreen(hasCamera: Boolean) {
                             )
                         }
                     }
+
+                    // 模型持久化
+                    Spacer(Modifier.height(4.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        OutlinedButton(
+                            onClick = {
+                                engine.saveModel(
+                                    java.io.File(
+                                        cn.qsbye.robot_suit_zulu.ModelStore.dir(context, "exp4-depth"),
+                                        "depth_net.bin"
+                                    )
+                                )
+                            },
+                            enabled = engine.isTrained && !training,
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                                horizontal = 12.dp, vertical = 4.dp,
+                            ),
+                        ) { Text("保存模型", fontSize = 11.sp) }
+                        OutlinedButton(
+                            onClick = {
+                                engine.loadModel(
+                                    java.io.File(
+                                        cn.qsbye.robot_suit_zulu.ModelStore.dir(context, "exp4-depth"),
+                                        "depth_net.bin"
+                                    )
+                                )
+                            },
+                            enabled = !training,
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                                horizontal = 12.dp, vertical = 4.dp,
+                            ),
+                        ) { Text("加载模型", fontSize = 11.sp) }
+                    }
                 }
 
                 // 训练进度与损失曲线
