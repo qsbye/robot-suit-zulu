@@ -1,6 +1,6 @@
 # 参考资料
 
-本目录收录回声消除（AEC）、主动噪声消除（ANC）、降噪（ANS/NS）等音频算法学习资料，以及单目深度估计、神经网络可解释性、手写神经网络训练框架等 AI 前沿文章，均由本地保存的网页 HTML 经 [markitdown](https://github.com/microsoft/markitdown)（uv tool 安装）转换为 Markdown 并人工整理排版（自 2026-10-02 起陆续归档），文首标注原文来源。图片在原网页中为内联资源的，转换后以占位形式呈现；原图为远程链接的保留原链接，需要时请访问原文链接查看。
+本目录收录回声消除（AEC）、主动噪声消除（ANC）、降噪（ANS/NS）等音频算法学习资料，以及单目深度估计、神经网络可解释性、手写神经网络训练框架、YOLO 端侧部署等 AI 前沿文章，均由本地保存的网页 HTML 经 [markitdown](https://github.com/microsoft/markitdown)（uv tool 安装）转换为 Markdown 并人工整理排版（自 2026-10-02 起陆续归档），文首标注原文来源。图片在原网页中为内联资源的，转换后以占位形式呈现；原图为远程链接的保留原链接，需要时请访问原文链接查看。
 
 ## 目录
 
@@ -14,6 +14,7 @@
 | [把 Depth Anything 砍到 6M，深度估计终于能跑进 Jetson](depthart-tiny-depth-estimation-jetson-aitnt.md) | 6M 参数级基础深度模型 DepthART：抗偏置数据采样（BRDS）、相机条件化微调（CamFT）、MobileNetV4/SPF 轻量变体与端侧部署 | [AITNT · 机器之心](https://m.aitntnews.com/newDetail.html?newId=29947) |
 | [神经网络可解释性被 AI 解决了？90% 神经元只有一个功能](neural-network-interpretability-weixin.md) | Nick Cammarata 长文解读：多义性再审视、递归泛化、AI 科学家驱动的可解释性研究 | [微信公众号「机器之心」](https://mp.weixin.qq.com/s/_oqtFLpXkFSufQGz-adGHQ) |
 | [手写一个神经网络训练框架 (TinyTorch)](tinytorch-neural-network-training-framework-robot9.md) | C++ 从零实现类 PyTorch 训练框架：Tensor/Function 自动微分、Module/Optimizer/Scheduler、MNIST 完整训练 | [Robot 9 · Keith](https://robot9.me/write-nn-framework-from-scratch-tinytorch/) |
+| [基于YOLOv8与腾讯地图的视障辅助Android应用——从模型训练到端侧部署全链路实践](yolov8-vision-assist-app-lbs.md) | YOLOv8 盲道/障碍物检测：模型训练、ONNX 导出与端侧推理、腾讯地图接入、MCP+大模型语音引导全链路 | [腾讯位置服务 · Undoom](https://lbs.qq.com/article?id=1254) |
 
 ## 与本项目的关系
 
