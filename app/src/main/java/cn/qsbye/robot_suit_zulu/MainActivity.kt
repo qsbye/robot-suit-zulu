@@ -61,6 +61,7 @@ import cn.qsbye.robot_suit_zulu.draw.DrawPage
 import cn.qsbye.robot_suit_zulu.draw.DrawViewModel
 import cn.qsbye.robot_suit_zulu.draw.OrientationTracker
 import cn.qsbye.robot_suit_zulu.qrpose.QrPosePage
+import cn.qsbye.robot_suit_zulu.hummingbird.HummingbirdPage
 import cn.qsbye.robot_suit_zulu.quickjseditor.QuickJSPage
 import cn.qsbye.robot_suit_zulu.tinytorch.ui.TinyTorchPage
 import cn.qsbye.robot_suit_zulu.ui.theme.RobotSuitZuluTheme
@@ -461,12 +462,7 @@ private fun FunctionPageContent(
                         "手机即摄像头 + 算力 + IDE 一体的可编程视觉传感器。",
                     status = "功能规划中，暂不实现（sections/exp7-openmv-for-android）"
                 )
-                "hummingbird" -> PlannedFeaturePage(
-                    summary = "昆虫式视觉循迹返航：去程记录 16 字节 Fourier 压缩全景快照，" +
-                        "返程用里程计粗走 + 视觉归巢精修交替消漂移，百米路线内存开销约 1KB。" +
-                        "参考 Science Robotics 2024《Visual route following for tiny autonomous robots》。",
-                    status = "功能规划中，暂不实现（sections/exp8-hummingbird-drone）"
-                )
+                "hummingbird" -> HummingbirdPage()
                 "recon" -> PlannedFeaturePage(
                     summary = "睿抗「空中侦察」任务链：自主起飞 → 穿越双障碍 → 绕柱 → " +
                         "悬停识别目标编号牌与真假目标 → 激光攻击正确目标 → 返航降落。" +
@@ -490,7 +486,7 @@ private fun FunctionPageContent(
                 FunctionCard("深度学习", "TinyTorch 端上训练") { onSelectPage("ai") }
                 FunctionCard("脚本绘图", "QuickJS 指令绘图") { onSelectPage("script") }
                 FunctionCard("脚本视觉", "OpenMV for Android（规划）") { onSelectPage("scriptvision") }
-                FunctionCard("蜂鸟无人机", "昆虫式视觉循迹返航（规划）") { onSelectPage("hummingbird") }
+                FunctionCard("蜂鸟无人机", "昆虫式视觉循迹返航") { onSelectPage("hummingbird") }
                 FunctionCard("侦查无人机", "室内自主空中侦察（规划）") { onSelectPage("recon") }
             }
         }

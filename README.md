@@ -385,9 +385,9 @@ Typical pipeline: phone camera frames → QR / feature detection (this repo's `a
 
 ### 实验八 / Exp 8 — 蜂鸟无人机：昆虫式视觉循迹返航（Hummingbird Drone: Insect-inspired Visual Route Following）（部分实现 / partially implemented）🚧
 
-> 参考 [Visual route following for tiny autonomous robots](https://www.science.org/doi/10.1126/scirobotics.adk0310)（van Dijk et al., *Science Robotics* 9, eadk0310, 2024；TU Delft，56g Crazyflie Brushless，STM32F4/192KB RAM 上实现）。工程目录 [`sections/exp8-hummingbird-drone/`](sections/exp8-hummingbird-drone/)（已实现小地图、Fourier 快照归巢引擎与相机模式）
+> 参考 [Visual route following for tiny autonomous robots](https://www.science.org/doi/10.1126/scirobotics.adk0310)（van Dijk et al., *Science Robotics* 9, eadk0310, 2024；TU Delft，56g Crazyflie Brushless，STM32F4/192KB RAM 上实现）。工程目录 [`sections/exp8-hummingbird-drone/`](sections/exp8-hummingbird-drone/)（已实现小地图、Fourier 快照归巢引擎与相机模式，并集成为主 app 的「蜂鸟无人机」入口）
 >
-> *Based on [Visual route following for tiny autonomous robots](https://www.science.org/doi/10.1126/scirobotics.adk0310) (van Dijk et al., Science Robotics 9, eadk0310, 2024; TU Delft, implemented on a 56 g Crazyflie Brushless with STM32F4 / 192 KB RAM). Directory [`sections/exp8-hummingbird-drone/`](sections/exp8-hummingbird-drone/) (minimap, Fourier snapshot homing engine and camera mode implemented).*
+> *Based on [Visual route following for tiny autonomous robots](https://www.science.org/doi/10.1126/scirobotics.adk0310) (van Dijk et al., Science Robotics 9, eadk0310, 2024; TU Delft, implemented on a 56 g Crazyflie Brushless with STM32F4 / 192 KB RAM). Directory [`sections/exp8-hummingbird-drone/`](sections/exp8-hummingbird-drone/) (minimap, Fourier snapshot homing engine and camera mode implemented; also shipped as the "Hummingbird Drone" entry of the main app).*
 
 **目标**：把论文的「昆虫式视觉导航」范式搬到手机 + 微型无人机平台——去程沿途记录**极度压缩的全景快照**，返程用「里程计粗走 + 视觉归巢（visual homing）精修」交替前进，周期性地把里程计漂移清零，让算力/内存极度受限的平台也能沿百米级原路返航。
 

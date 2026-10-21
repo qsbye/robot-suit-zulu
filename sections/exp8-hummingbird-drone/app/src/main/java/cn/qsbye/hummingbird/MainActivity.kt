@@ -232,8 +232,12 @@ fun SimPane(model: MinimapModel) {
             }
         }
     }
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    // 文本贴顶部居中：右下角被小地图占据，居中放置会与之重叠
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+        Column(
+            Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
                 "主视角区（仿真）",
                 style = MaterialTheme.typography.headlineSmall,

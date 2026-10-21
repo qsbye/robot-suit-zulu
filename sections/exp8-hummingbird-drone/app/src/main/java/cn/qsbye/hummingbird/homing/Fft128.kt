@@ -53,8 +53,8 @@ object Fft128 {
         }
         if (inverse) {
             for (i in 0 until N) {
-                re[i] /= N
-                im[i] /= N
+                re[i] = re[i] / N
+                im[i] = im[i] / N
             }
         }
     }
