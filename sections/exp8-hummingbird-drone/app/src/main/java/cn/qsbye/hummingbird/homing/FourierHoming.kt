@@ -22,8 +22,11 @@ object FourierHoming {
     const val KEEP = 8
     const val SNAPSHOT_BYTES = 2 * KEEP // 16 字节
 
-    /** 单位 RMS 信号低频系数理论上限 ≈ √128，取 12 作量化满幅 */
-    private const val QUANT_SCALE = 12f
+    /**
+     * 量化满幅：单位 RMS 信号的 |F_k| 理论上界 = N/2·√2 ≈ 90.5，
+     * 取 96 可保证任意归一化信号不被削顶（量化步长 0.76，16 个分量的量化噪声可忽略）。
+     */
+    private const val QUANT_SCALE = 96f
 
     /** 16 字节 Fourier 快照 */
     class Snapshot(val bytes: ByteArray) {
@@ -130,7 +133,8 @@ object FourierHoming {
         for (d in 0 until N) {
             var cross = 0f
             for (k in 1..KEEP) {
-                val ang = 2.0 * PI * k * d / N
+                // ℰ(Δ) = C − 2·Re Σ_k G_k·conj(F_k)·e^(−i2πkΔ/N)，最小值处 Δ=d
+                val ang = -2.0 * PI * k * d / N
                 val ca = cos(ang).toFloat()
                 val sa = sin(ang).toFloat()
                 // G_k · conj(F_k) 的实/虚部
@@ -167,7 +171,9 @@ object FourierHoming {
         Fft128.inverse(are, aim)
         var best = 0
         for (i in 1 until N) if (are[i] > are[best]) best = i
-        return if (best > N / 2) best - N else best
+        // 互相关峰在 N−d，换算回约定 cur[i] = prev[(i + d) mod N] 的 d
+        val d = (N - best) % N
+        return if (d > N / 2) d - N else d
     }
 
     /** 合成天际线信号（仿真模式演示 ℰ/归巢）：k=1..KEEP 次随机幅相谐波，单位 RMS */

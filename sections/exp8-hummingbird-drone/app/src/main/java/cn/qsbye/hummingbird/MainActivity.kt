@@ -18,6 +18,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
@@ -98,8 +100,18 @@ fun HomingApp() {
     val permLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { hasCam = it }
 
-    // 切模式清空会话
-    LaunchedEffect(mode) { model.clear() }
+    // 切模式清空会话；仿真模式用帧循环驱动里程计（相机模式由帧分析回调驱动）
+    LaunchedEffect(mode) {
+        model.clear()
+        if (mode != Mode.SIM) return@LaunchedEffect
+        var last = 0L
+        while (true) {
+            withFrameNanos { now ->
+                if (last != 0L) model.step(((now - last) / 1e9f).coerceAtMost(0.05f))
+                last = now
+            }
+        }
+    }
 
     Column(Modifier.fillMaxSize()) {
         // 顶部：模式切换 + 状态
@@ -159,10 +171,11 @@ fun HomingApp() {
                 .height(84.dp)
         )
 
-        // 控制
+        // 控制（窄屏可横向滚动，避免按钮被挤出屏幕）
         Row(
             Modifier
                 .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
                 .padding(12.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -271,14 +284,22 @@ fun CameraPane(model: MinimapModel) {
         onDispose { sm?.unregisterListener(listener) }
     }
 
+    // 相机分析线程与 CameraProvider 生命周期
+    val executor = remember { Executors.newSingleThreadExecutor() }
+    val providerRef = remember { mutableStateOf<ProcessCameraProvider?>(null) }
+    DisposableEffect(Unit) {
+        onDispose {
+            providerRef.value?.unbindAll()
+            executor.shutdown()
+        }
+    }
+
     Box(Modifier.fillMaxSize()) {
         AndroidView(
             factory = { c ->
                 val pv = PreviewView(c)
-                val provider = ProcessCameraProvider.getInstance(c).get()
                 val preview = Preview.Builder().build()
                     .also { it.setSurfaceProvider(pv.surfaceProvider) }
-                val executor = Executors.newSingleThreadExecutor()
                 val engine = CameraHomingEngine(object : CameraHomingEngine.OnFrameListener {
                     override fun onFrame(
                         signal: FloatArray,
@@ -310,13 +331,19 @@ fun CameraPane(model: MinimapModel) {
                     }
                 })
                 val analysis = ImageAnalysis.Builder()
-                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATE)
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
                     .also { it.setAnalyzer(executor, engine) }
-                provider.unbindAll()
-                provider.bindToLifecycle(
-                    lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis
-                )
+                // 异步获取 CameraProvider，避免主线程阻塞
+                val future = ProcessCameraProvider.getInstance(c)
+                future.addListener({
+                    val provider = future.get()
+                    providerRef.value = provider
+                    provider.unbindAll()
+                    provider.bindToLifecycle(
+                        lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis
+                    )
+                }, ContextCompat.getMainExecutor(c))
                 pv
             },
             modifier = Modifier.fillMaxSize()
