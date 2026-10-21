@@ -19,3 +19,6 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# QuickJS（taoweiji quickjs-android）：JNI 回调与 native 方法不可混淆/裁剪
+-keep class com.quickjs.** { *; }
