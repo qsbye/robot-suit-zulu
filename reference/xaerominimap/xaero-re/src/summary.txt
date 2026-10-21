@@ -1,0 +1,30 @@
+Summary for /Users/workspace/Desktop/2026年10月/robot-suit-zulu/reference/xaerominimap-fabric-26.3-26.6.1.jar
+Decompiled with CFR 0.152
+
+
+xaero.hud.category.ui.GuiCategoryEditor
+----------------------------
+
+setSelected(xaero.hud.category.ui.GuiCategoryEditor$SettingRowList$Entry )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+xaero.hud.category.ui.entry.EditorListEntry
+----------------------------
+
+mouseClicked(xaero.hud.category.ui.GuiCategoryEditor$SettingRowList$Entry double double int net.minecraft.client.input.MouseButtonInfo boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+xaero.hud.category.ui.entry.EditorListEntryWidget
+----------------------------
+
+mouseClicked(xaero.hud.category.ui.GuiCategoryEditor$SettingRowList$Entry double double int net.minecraft.client.input.MouseButtonInfo boolean )
+  Ignored method signature, as it can't be verified against descriptor
+
+
+xaero.hud.category.ui.node.EditorCategoryNode
+----------------------------
+
+buildSubCategories()
+  Exception : java.lang.IndexOutOfBoundsException: Index: 0, Size: 0

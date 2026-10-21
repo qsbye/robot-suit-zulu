@@ -1,0 +1,23 @@
+Summary for minimap/META-INF/jars/xaerolib-fabric-26.3-1.8.3.jar
+Decompiled with CFR 0.152
+
+
+xaero.lib.client.gui.widget.online.loader.ImageWidgetLoader
+----------------------------
+
+load(java.util.Map<java.lang.String, java.lang.String> )
+  Unable to fully structure code
+
+
+xaero.lib.common.config.io.ConfigIO
+----------------------------
+
+load(java.nio.file.Path int )
+  Exception : org.benf.cfr.reader.util.ConfusedCFRException: Started 3 blocks at once
+
+
+xaero.lib.common.config.option.value.io.serialization.LargeConfigValueIOCodec
+----------------------------
+
+loadValueFromFile(java.nio.file.Path int )
+  Exception : org.benf.cfr.reader.util.ConfusedCFRException: Started 3 blocks at once

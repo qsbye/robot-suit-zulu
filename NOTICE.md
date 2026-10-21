@@ -36,6 +36,13 @@ GitHub [AIRI-Institute/DepthART](https://github.com/AIRI-Institute/DepthART) 工
 
 GitHub [keith2018/TinyTorch](https://github.com/keith2018/TinyTorch) 工程的完整副本（从零手写 C++ 神经网络训练框架），以 [MIT License](reference/TinyTorch-main/LICENSE) 授权，Copyright (c) 2024 Keith。本仓库仅作端上微型训练框架实验（实验五）的技术参考收录；随附 MNIST 数据集（`examples/mnist/data/`）为原始 Yann LeCun 公开数据，版权归原作者。
 
+## 8. reference/xaerominimap/xaero-re/
+
+- `xaerominimap-fabric-26.3-26.6.1.jar`：Xaero's Minimap（作者 **xaero96**）Fabric 版发行 jar，原许可为 **All Rights Reserved**（jar 内 `LICENSE_xaerohud` 全文仅此两词）。仅作本地参考。
+- `xaero-re/src/`、`xaero-re/libsrc/`：上述 jar（及内嵌 `xaerolib-fabric-26.3-1.8.3.jar`）经 CFR 0.152 反编译得到的 Java 源码存档，是原作品的**衍生复制**。
+- 该目录按仓库维护者要求以 **CC BY-SA 3.0** 标注，但**该标注未经版权人授权**：原作品为 All Rights Reserved，权利人并未以 CC BY-SA 3.0 或任何其他许可发布，本仓库无权再许可。详见 [PROVENANCE.md](reference/xaerominimap/xaero-re/PROVENANCE.md)。仅作架构研究存档，不用于构建、分发或商用。
+- `20261021-124516-XaeroMinimap_逆向分析报告.md`：静态分析学习报告，不含反编译代码，仅记录架构与参数事实。
+
 ## 运行时依赖（构建时由 Gradle 自动拉取，不随本仓库分发）
 
 | 依赖 | 许可证 |

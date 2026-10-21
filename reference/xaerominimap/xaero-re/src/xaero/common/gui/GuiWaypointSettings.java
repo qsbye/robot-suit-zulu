@@ -1,0 +1,22 @@
+/*
+ * Decompiled with CFR 0.152.
+ */
+package xaero.common.gui;
+
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import xaero.common.IXaeroMinimap;
+import xaero.common.gui.GuiMinimapSettings;
+import xaero.hud.minimap.common.config.option.MinimapProfiledConfigOptions;
+import xaero.lib.client.gui.ISettingEntry;
+import xaero.lib.client.gui.config.context.IEditConfigScreenContext;
+import xaero.lib.common.config.option.ConfigOption;
+
+public class GuiWaypointSettings
+extends GuiMinimapSettings {
+    public GuiWaypointSettings(IXaeroMinimap modMain, Screen backScreen, Screen escScreen, IEditConfigScreenContext context) {
+        super((Component)Component.translatable((String)"gui.xaero_waypoint_settings"), backScreen, escScreen, context);
+        this.entries = new ISettingEntry[]{this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINTS_ON_MINIMAP), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINTS_IN_WORLD), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.DEATHPOINTS), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.OLD_DEATHPOINTS), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.DELETE_REACHED_DEATHPOINTS), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.AUTO_WAYPOINTS_ON_DEATH), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_ICON_SCALE_IN_WORLD), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_NAME_SCALE_IN_WORLD), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_CLOSE_SCALE_IN_WORLD), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_DISTANCE_SCALE_IN_WORLD), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_DISTANCE_IN_WORLD), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_DISTANCE_IN_MENU), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_NAME_IN_WORLD), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_SHORT_DISTANCE_IN_WORLD), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.MULTIPLE_WAYPOINTS_INFO), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINTS_ALL_SETS), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_VERTICAL_POINTING_ANGLE), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_HORIZONTAL_POINTING_ANGLE), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_MAX_DISTANCE), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_MIN_DISTANCE_IN_WORLD), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_MAX_DISTANCE_DIMENSION_SCALE), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_CONVERT_DISTANCE_TO_KM_AT), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_OPACITY_IN_WORLD), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_DISTANCE_PRECISION), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_OPACITY_ON_MINIMAP), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_ICON_SCALE_ON_MINIMAP), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.TEMPORARY_WAYPOINTS_GLOBAL), this.optionEntry(MinimapProfiledConfigOptions.WAYPOINT_DEFAULT_TELEPORT_FORMAT), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_TELEPORT_CROSS_DIMENSION), this.optionEntry(MinimapProfiledConfigOptions.WAYPOINT_DEFAULT_TELEPORT_ROTATION_FORMAT), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.WAYPOINT_PARTIAL_Y_TELEPORT), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.NEW_WAYPOINTS_TO_BOTTOM), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.HIDE_WORLD_NAMES), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.HIDE_WAYPOINT_COORDINATES), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.COMPASS_OVER_EVERYTHING), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.COMPASS_LOCATION), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.COMPASS_SHADOW_COLOR), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.COMPASS_SCALE), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.COMPASS_NORTH_SHADOW_COLOR), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.DISCOVERED_WAYSTONE_WAYPOINTS), this.optionEntry((ConfigOption)MinimapProfiledConfigOptions.OTHER_WAYSTONE_WAYPOINTS)};
+    }
+}
+
