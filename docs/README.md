@@ -15,6 +15,7 @@
 | [神经网络可解释性被 AI 解决了？90% 神经元只有一个功能](neural-network-interpretability-weixin.md) | Nick Cammarata 长文解读：多义性再审视、递归泛化、AI 科学家驱动的可解释性研究 | [微信公众号「机器之心」](https://mp.weixin.qq.com/s/_oqtFLpXkFSufQGz-adGHQ) |
 | [手写一个神经网络训练框架 (TinyTorch)](tinytorch-neural-network-training-framework-robot9.md) | C++ 从零实现类 PyTorch 训练框架：Tensor/Function 自动微分、Module/Optimizer/Scheduler、MNIST 完整训练 | [Robot 9 · Keith](https://robot9.me/write-nn-framework-from-scratch-tinytorch/) |
 | [基于YOLOv8与腾讯地图的视障辅助Android应用——从模型训练到端侧部署全链路实践](yolov8-vision-assist-app-lbs.md) | YOLOv8 盲道/障碍物检测：模型训练、ONNX 导出与端侧推理、腾讯地图接入、MCP+大模型语音引导全链路 | [腾讯位置服务 · Undoom](https://lbs.qq.com/article?id=1254) |
+| [Xaero's Minimap（Minecraft 小地图 Mod）](xaeros-minimap-curseforge.md) | 角落小地图交互范本：瓦片化增量渲染、锁定北方/头朝向旋转、路径点/死亡点/子世界、洞穴模式自动切换、服务端管控 | [CurseForge · xaero96](https://www.curseforge.com/minecraft/mc-mods/xaeros-minimap) |
 
 ## 与本项目的关系
 
