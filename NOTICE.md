@@ -4,7 +4,7 @@
 
 下列内容为第三方版权材料，仅作学习参考收录，**不属于** MIT License 覆盖范围，版权归原作者或机构所有。如需再分发或商用，请自行获得权利人授权。
 
-其中**原始来源未注明任何许可**的材料，按本仓库的宽松 FOSS 约定统一以 [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) 标注（免费使用 + 署名 + 相同方式共享），见 [README.md](README.md#未注明许可的材料统一标注-cc-by-sa-30)。该标注是本仓库的归档约定，不能替代原权利人的授权；原作品另有声明时以原声明为准。
+其中**原始来源未注明任何许可**的材料，按本仓库的宽松 FOSS 约定统一以 [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) 标注（免费使用 + 署名 + 相同方式共享），见 [README.md](README.md#foss-default-license)。该标注是本仓库的归档约定，不能替代原权利人的授权；原作品另有声明时以原声明为准。
 
 ## 1. reference/justaline/
 
